@@ -10,6 +10,6 @@ jobs:
 
       - name: Test Common Lisp
         id: foo
-        uses: fosskers/cl-action@v0.0.3
+        uses: fosskers/cl-action@v0.0.4
         with:
           compiler: "sbcl"
