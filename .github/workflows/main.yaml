@@ -5,12 +5,11 @@ jobs:
     runs-on: ubuntu-latest
     name: A job to say hello
     steps:
-      - uses: actions/checkout@v4
-      - id: foo
-        uses: fosskers/cl-action@v0.0.1
+      - name: Clone the Project
+        uses: actions/checkout@v4
+
+      - name: Test Common Lisp
+        id: foo
+        uses: fosskers/cl-action@v0.0.2
         with:
-          who-to-greet: "Mona the Octocat"
-      - run: echo random-number "$RANDOM_NUMBER"
-        shell: bash
-        env:
-          RANDOM_NUMBER: ${{ steps.foo.outputs.random-number }}
+          compiler: "sbcl"
