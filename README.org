@@ -71,7 +71,7 @@ true form.
 Dependency management in Common Lisp has traditionally centred around [[https://www.quicklisp.org/beta/][Quicklisp]].
 A desire for access to more rapid package updates spawned [[https://ultralisp.org/][Ultralisp]]. The need
 for version pinning and isolation birthed [[https://github.com/fukamachi/qlot][Qlot]]. The want for a better
-distribution system brought us [[https://github.com/ocicl/ocicl][OCICL]].
+distribution system brought us [[https://github.com/ocicl/ocicl][ocicl]].
 
 But, could there be a simpler paradigm than just /downloading the code and
 putting it right there/?
