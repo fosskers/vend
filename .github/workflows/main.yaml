@@ -1,0 +1,15 @@
+on: [pull_request]
+
+jobs:
+  hello_world_job:
+    runs-on: ubuntu-latest
+    name: A job to say hello
+    steps:
+      - name: Clone the Project
+        uses: actions/checkout@v4
+
+      - name: Test Common Lisp
+        id: foo
+        uses: fosskers/cl-action@v0.0.6
+        with:
+          compiler: "sbcl"
