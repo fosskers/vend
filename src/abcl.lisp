@@ -125,8 +125,30 @@
         ver)))
 
 (defun extract-prop-name (s)
+  "Pull the inner property name from a ${} fence."
   (let ((len (length s)))
     (subseq s 2 (1- len))))
 
 #+nil
 (extract-prop-name "${commons.lang3.version}")
+
+(defun classpath (dep)
+  "Build a collection of names matched to JAR locations on disk."
+  (labels ((recurse (ht curr)
+             ;; FIXME: 2025-05-25 This condition may be incorrect. It might be
+             ;; better to both the group and artifact together as the key.
+             (let ((name (getf curr :artifact)))
+               (if (gethash name ht)
+                   ht
+                   (let* ((jar (java-jar-path curr))
+                          (pom (java-pom-path curr))
+                          (xml (x:parse (string-from-file pom))))
+                     (setf (gethash name ht) jar)
+                     (dolist (dep (deps-from-xml xml))
+                       (recurse ht dep))
+                     ht)))))
+    (recurse (make-hash-table :test #'equal :size 64) dep)))
+
+#+nil
+(classpath '(:group "org.apache.commons" :artifact "commons-text" :version "1.13.1"))
+
