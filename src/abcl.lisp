@@ -80,3 +80,15 @@
 
 #+nil
 (java-pom-path '(:group "org.apache.commons" :artifact "commons-text" :version "1.13.1"))
+
+;; NOTE: 2025-05-25 This is about 2x faster than `uiop:read-file-string', and
+;; much, much faster than reading it in line-by-line and re-fusing via
+;; transducers.
+(declaim (ftype (function (pathname) (simple-array character *)) string-from-file))
+(defun string-from-file (path)
+  "Read some given file into a single string."
+  (with-open-file (stream path :direction :input :element-type 'character)
+    (let* ((len (file-length stream))
+           (str (make-string len)))
+      (read-sequence str stream)
+      str)))
