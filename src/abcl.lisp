@@ -92,3 +92,41 @@
            (str (make-string len)))
       (read-sequence str stream)
       str)))
+
+#+nil
+(x:parse (string-from-file (java-pom-path '(:group "org.apache.commons" :artifact "commons-text" :version "1.13.1"))))
+
+(defun deps-from-xml (xml)
+  "Extract the non-test dependencies from some parsed XML."
+  (let* ((content (x:content xml))
+         (deps    (gethash "dependency" (x:content (gethash "dependencies" content))))
+         (props   (x:content (gethash "properties" content))))
+    (t:transduce
+     (t:comp (t:map #'x:content)
+             (t:filter (lambda (ht) (gethash "version" ht)))
+             (t:filter (lambda (ht) (not (gethash "scope" ht))))
+             (t:map (lambda (ht)
+                      (list :group    (x:content (gethash "groupId" ht))
+                            :artifact (x:content (gethash "artifactId" ht))
+                            :version  (dep-version props ht)))))
+     #'t:cons
+     deps)))
+
+#+nil
+(let* ((path (java-pom-path '(:group "org.apache.commons" :artifact "commons-text" :version "1.13.1")))
+       (xml  (x:parse (string-from-file path))))
+  (deps-from-xml xml))
+
+(defun dep-version (props dep)
+  "For a particular dependency, discover its true version."
+  (let ((ver (x:content (gethash "version" dep))))
+    (if (eql #\$ (schar ver 0))
+        (x:content (gethash (extract-prop-name ver) props))
+        ver)))
+
+(defun extract-prop-name (s)
+  (let ((len (length s)))
+    (subseq s 2 (1- len))))
+
+#+nil
+(extract-prop-name "${commons.lang3.version}")
