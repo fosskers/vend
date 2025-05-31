@@ -2,9 +2,21 @@
 
 ### Unreleased
 
+#### Fixed
+
+- A forgotten `all?` export.
+
+### 1.4.0 (2025-02-15)
+
 #### Added
 
 - `unique-by` for more control over how uniqueness is determined.
+- `for` as a better pattern for doing something effectful over the stream.
+- `any?`, `all?`, and `reduced?` as modern aliases.
+
+#### Deprecated
+
+- `for-each`: use `for` instead.
 
 ### 1.3.1 (2025-01-13)
 

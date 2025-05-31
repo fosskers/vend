@@ -127,6 +127,8 @@ map back to the parent, such that later only one git clone is performed.")
   "Repositories marked as deprecated or archived by their authors.")
 
 ;; TODO: 2024-01-11 Make this a HashTable.
+;;
+;; 2025-05-26 Maybe.
 (defparameter +sources+
   '(:3b-bmfont       "https://github.com/3b/3b-bmfont.git"
     :3b-hdr          "https://github.com/3b/3b-hdr.git"
@@ -135,6 +137,7 @@ map back to the parent, such that later only one git clone is performed.")
     :3d-math         "https://github.com/Shinmera/3d-math.git"
     :3d-spaces       "https://github.com/Shirakumo/3d-spaces.git"
     :40ants-doc      "https://github.com/40ants/doc.git"
+    :abcl-memory-compiler "https://github.com/alejandrozf/abcl-memory-compiler.git"
     :access          "https://github.com/AccelerationNet/access.git"
     :acclimation     "https://github.com/robert-strandh/Acclimation.git"
     :action-list     "https://github.com/Shinmera/action-list.git"

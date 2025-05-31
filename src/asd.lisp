@@ -74,7 +74,7 @@
 #++
 (chipz? "#+chipz-system:gray-streams")
 
-(defun string-from-file (path)
+(defun string-from-asd-file (path)
   "Preserves newlines but removes whole-line comments."
   (t:transduce (t:comp (t:filter (lambda (line) (not (comment? line))))
                        (t:filter (lambda (line) (not (chipz? (string-left-trim " " line)))))
@@ -83,7 +83,7 @@
                #'t:string path))
 
 #++
-(string-from-file #p"vend.asd")
+(string-from-asd-file #p"vend.asd")
 
 (defun systems-from-file (path)
   "Extract all `defsystem' forms as proper sexp from a file."
@@ -91,7 +91,7 @@
                         (let* ((clean (sanitize sys))
                                (stream (make-string-input-stream clean)))
                           (read stream nil :eof))))
-               #'t:cons (all-system-strings (string-from-file path))))
+               #'t:cons (all-system-strings (string-from-asd-file path))))
 
 #++
 (systems-from-file (car (asd-files "./")))

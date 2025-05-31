@@ -2,7 +2,8 @@
   (:use :cl)
   (:local-nicknames (#:g #:simple-graph)
                     (#:p #:filepaths)
-                    (#:t #:transducers))
+                    (#:t #:transducers)
+                    (#:x #:parcom/xml))
   (:export #:main)
   (:documentation "Simply vendor your Common Lisp project dependencies."))
 
