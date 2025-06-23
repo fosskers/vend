@@ -146,6 +146,7 @@ map back to the parent, such that later only one git clone is performed.")
     :alloy           "https://github.com/Shirakumo/alloy.git"
     :anaphora        "https://github.com/spwhitton/anaphora.git"
     :ansi-test       "https://gitlab.common-lisp.net/ansi-test/ansi-test.git"
+    :anypool         "https://github.com/fukamachi/anypool"
     :arnesi          "https://github.com/AccelerationNet/arnesi.git"
     :array-operations "https://github.com/Lisp-Stat/array-operations.git"
     :array-utils     "https://github.com/Shinmera/array-utils.git"
@@ -246,6 +247,7 @@ map back to the parent, such that later only one git clone is performed.")
     :cl-qprint       "https://github.com/eugeneia/cl-qprint.git"
     :cl-qrencode     "https://github.com/jnjcc/cl-qrencode.git"
     :cl-readline     "https://github.com/vindarel/cl-readline.git"
+    :cl-redis        "https://github.com/vseloved/cl-redis"
     :cl-resvg        "https://github.com/Shirakumo/cl-resvg.git"
     :cl-sendmail     "https://github.com/u-u-h/cl-sendmail.git"
     :cl-setlocale    "https://github.com/shamazmazum/cl-setlocale.git"
@@ -680,6 +682,7 @@ map back to the parent, such that later only one git clone is performed.")
       (when (string-starts-with? (symbol-name sys) "DBD-") :dbi)
       (when (string-starts-with? (symbol-name sys) "FRUGAL-UUID/") :frugal-uuid)
       (when (string-starts-with? (symbol-name sys) "HSX/") :hsx)
+      (when (string-starts-with? (symbol-name sys) "LSX/") :lsx)
       (when (string-starts-with? (symbol-name sys) "IOLIB/") :iolib)
       (when (string-starts-with? (symbol-name sys) "IRONCLAD/") :ironclad)
       (when (string-starts-with? (symbol-name sys) "JSONRPC/") :jsonrpc)
