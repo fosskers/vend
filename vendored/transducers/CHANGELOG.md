@@ -2,6 +2,11 @@
 
 ### Unreleased
 
+#### Added
+
+- Reducer: `quantities` for counting unique occurrences of streamed items.
+- Reducer: `partition` for splitting the stream results.
+
 #### Fixed
 
 - A forgotten `all?` export.

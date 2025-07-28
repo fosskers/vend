@@ -62,8 +62,9 @@ Looking for Transducers in other Lisps? Check out the [[https://github.com/fossk
     - [[#from-csv-into-csv][from-csv, into-csv]]
   - [[#reducers][Reducers]]
     - [[#cons-snoc-vector-string-hash-table][cons, snoc, vector, string, hash-table]]
-    - [[#count-average-median][count, average, median]]
+    - [[#count-average-median-quantities][count, average, median, quantities]]
     - [[#any-all][any?, all?]]
+    - [[#partition][partition]]
     - [[#first-last-find][first, last, find]]
     - [[#fold][fold]]
     - [[#for][for]]
@@ -651,7 +652,7 @@ Collect a stream of key-value cons pairs into a hash table.
 #+RESULTS:
 : #<COMMON-LISP:HASH-TABLE :TEST EQUAL :COUNT 3 {1004E83BF3}>
 
-*** count, average, median
+*** count, average, median, quantities
 
 Count the number of elements that made it through the transduction.
 
@@ -685,6 +686,17 @@ median is extracted.
 #+RESULTS:
 : 1
 
+Count the occurrences of every item in the transduction, given some equality
+predicate.
+
+#+begin_src lisp :exports both
+(in-package :transducers)
+(transduce #'pass (quantities #'eql) '(1 1 1 0 2 4 1 4 9))
+#+end_src
+
+#+RESULTS:
+: #<COMMON-LISP:HASH-TABLE :TEST EQL :COUNT 5 {10094FE823}>
+
 *** any?, all?
 
 Yield =t= if any element in the transduction satisfies PRED. Short-circuits the
@@ -708,6 +720,19 @@ NIL if any element fails the test.
 
 #+RESULTS:
 : T
+*** partition
+
+Given some predicate function, split the stream and collect its values into two
+lists, those items that passed the check, and those that failed. You must use
+=multiple-value-bind= or similar to receive both lists.
+
+#+begin_src lisp :exports both :results verbatim
+(in-package :transducers)
+(transduce #'pass (partition #'evenp) '(1 2 3 4 5))
+#+end_src
+
+#+RESULTS:
+: (2 4), (1 3 5)
 
 *** first, last, find
 
