@@ -4,6 +4,8 @@
 
 #### Added
 
+- Transducer: `sexp` for interpretting a streams of chars or strings as separate
+  SEXP strings.
 - Reducer: `quantities` for counting unique occurrences of streamed items.
 - Reducer: `partition` for splitting the stream results.
 

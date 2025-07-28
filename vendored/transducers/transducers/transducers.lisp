@@ -455,6 +455,55 @@ applications of a given function F.
 #++
 (transduce (once nil) #'cons '())
 
+(defun sexp (reducer)
+  "Transducer: Interpret the data stream as S-expressions, yielding one at a time.
+The stream can consist of either individual characters or whole strings. The
+former would occur when transducing over a string directly. The latter would
+occur when transducing over a stream/file line-by-line."
+  (let ((acc (short-string))
+        (parens 0))
+    (lambda (result &optional (input nil i?))
+      (declare (type fixnum parens))
+      (labels ((one-char (res c)
+                 (case c
+                   (#\(
+                    (incf parens)
+                    (vector-push-extend c acc)
+                    res)
+                   (#\)
+                    (decf parens)
+                    (vector-push-extend c acc)
+                    (cond ((zerop parens)
+                           (let ((curr acc))
+                             (setf acc (short-string))
+                             (funcall reducer res curr)))
+                          ((< parens 0) (error 'unmatched-closing-paren))
+                          (t res)))
+                   (t (cond ((zerop parens) res)
+                            (t (vector-push-extend c acc)
+                               res)))))
+               (a-string (res i)
+                 (declare (type fixnum i))
+                 (cond ((= i (length input)) res)
+                       (t (let ((res (one-char res (char input i))))
+                            (cond ((reduced? res) res)
+                                  (t (a-string res (1+ i)))))))))
+        (cond (i? (etypecase input
+                    (character (one-char result input))
+                    (cl:string (a-string result 0))))
+              (t (funcall reducer result)))))))
+
+#+nil
+(transduce #'sexp #'cons "(+ 1 1)")
+#+nil
+(transduce #'sexp #'cons "(+ 1 1) (+ 2 2) (+ 3 (* 4 5))")
+#+nil
+(transduce #'sexp #'cons '("(+ 1 1)" "(+ 2 2)"))
+
+(defun short-string ()
+  "Allocate an adjustable short string for filling up later."
+  (make-array 16 :element-type 'character :adjustable t :fill-pointer 0))
+
 (defun from-csv (reducer)
   "Transducer: Interpret the data stream as CSV data.
 
@@ -534,6 +583,7 @@ of its values."
 (defun recsv (items)
   "Reconvert some ITEMS into a comma-separated string."
   (format nil "~{~a~^,~}" items))
+
 
 ;; --- Higher Order Transducers --- ;;
 
