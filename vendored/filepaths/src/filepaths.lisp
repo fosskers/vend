@@ -145,6 +145,7 @@ filesystem."
   (let ((path (ensure-path path)))
     (make-pathname :name new
                    :type (pathname-type path)
+                   :device (pathname-device path)
                    :directory (pathname-directory path)
                    :version :newest)))
 
@@ -168,6 +169,7 @@ filesystem."
   (let ((path (ensure-path path)))
     (make-pathname :name (base new)
                    :type (extension new)
+                   :device (pathname-device path)
                    :directory (pathname-directory path)
                    :version :newest)))
 
@@ -220,6 +222,7 @@ filesystem."
         (error 'no-filename :path path)
         (make-pathname :name (base path)
                        :type ext
+                       :device (pathname-device path)
                        :directory (pathname-directory path)
                        :version :newest))))
 
@@ -242,6 +245,7 @@ filesystem."
     ;; where only one extension was present.
     (make-pathname :name name
                    :type ext
+                   :device (pathname-device path)
                    :directory (pathname-directory path)
                    :version :newest)))
 
@@ -264,6 +268,7 @@ filesystem."
         ;; standard library.
         (make-pathname :name (concatenate 'string (base path) "." already)
                        :type ext
+                       :device (pathname-device path)
                        :directory (pathname-directory path)
                        :version :newest)
         (with-extension path ext))))
@@ -292,6 +297,7 @@ filesystem."
                            (t (keyword-if-special final-base)))
                    :type (extension final)
                    :version :newest
+                   :device (pathname-device parent)
                    :directory (cons abs-or-rel
                                     (mapcar #'keyword-if-special
                                             (append (if (absolutep parent)
@@ -369,6 +375,7 @@ filesystem."
         path
         (make-pathname :name nil
                        :type nil
+                       :device (pathname-device path)
                        ;; NOTE: 2025-05-12 The result of `pathname-directory'
                        ;; will be nil when a relative path with a single
                        ;; component is given. In that case, we must help it
@@ -376,7 +383,7 @@ filesystem."
                        ;; immediately afterward.
                        :directory (append (or (pathname-directory path)
                                               '(:relative))
-                                          (list (name path)))))))
+                                          (list (keyword-if-special (name path))))))))
 
 #+nil
 (ensure-directory #p"/foo/bar/baz")
@@ -384,6 +391,10 @@ filesystem."
 (ensure-directory "/foo")
 #+nil
 (ensure-directory "foo")
+#+nil
+(ensure-directory #p"/foo/bar/*")
+#+nil
+(ensure-directory #p"/foo/bar/**")
 
 (declaim (ftype (function ((or pathname string)) simple-string) ensure-string))
 (defun ensure-string (path)

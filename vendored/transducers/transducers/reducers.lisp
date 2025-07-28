@@ -277,3 +277,38 @@ final T."
 
 #++
 (transduce #'pass (for (lambda (n) (format t "~a~%" n))) #(1 2 3 4))
+
+(defun quantities (test)
+  "Reducer: Count the occurrences of every item in the transduction, given some
+equality predicate."
+  (lambda (&optional (acc nil a?) (input nil i?))
+    (cond ((and a? i?)
+           (let ((count (gethash input acc)))
+             (cond (count (incf (gethash input acc))
+                          acc)
+                   (t (setf (gethash input acc) 1)
+                      acc))))
+          ((and a? (not i?)) acc)
+          (t (make-hash-table :size 32 :test test)))))
+
+#+nil
+(transduce #'pass (quantities #'eql) '(1 1 2 1 3 4 5 4 3 2 1))
+
+(defun partition (pred)
+  "Reducer: Given some predicate function, split the stream and collect its values
+into two lists, those items that passed the check, and those that failed."
+  (lambda (&optional (acc nil a?) (input nil i?))
+    (cond ((and a? i?)
+           (destructuring-bind (passed . failed) acc
+             (cond ((funcall pred input)
+                    (setf (car acc) (cl:cons input passed))
+                    acc)
+                   (t (setf (cdr acc) (cl:cons input failed))
+                      acc))))
+          ((and a? (not i?))
+           (destructuring-bind (passed . failed) acc
+             (values (nreverse passed) (nreverse failed))))
+          (t (cl:cons '() '())))))
+
+#+nil
+(transduce #'pass (partition #'evenp) '(1 2 3 4 5))

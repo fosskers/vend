@@ -4,6 +4,18 @@
 
 #### Fixed
 
+- `ensure-directory` on paths that end in `*` or `**`.
+
+## 1.0.2 (2025-06-26)
+
+#### Added
+
+- Windows support, by accounting for the `:device` field of `pathname`.
+
+## 1.0.1 (2025-05-12)
+
+#### Fixed
+
 - Support `*` (`:wild`) in extension position.
 - `ensure-directory` on a relative path with one component (e.g. `foo -> foo/`).
 

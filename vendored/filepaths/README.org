@@ -22,8 +22,8 @@ instance:
 
 There are many more functions available.
 
-Note that this library is currently _Unix only_ and doesn't offer functions for
-communicating with the filesystem to test if files exist, etc.
+Note that this library supports both Unix and Windows, but doesn't offer
+functions for communicating with the filesystem to test if files exist, etc.
 
 * Table of Contents :TOC_5_gh:noexport:
 - [[#compatibility][Compatibility]]
@@ -46,7 +46,6 @@ communicating with the filesystem to test if files exist, etc.
     - [[#ensure-directory-ensure-string-ensure-path][ensure-directory, ensure-string, ensure-path]]
     - [[#to-string-from-string][to-string, from-string]]
   - [[#conditions][Conditions]]
-- [[#further-work][Further Work]]
 - [[#see-also][See Also]]
 
 * Compatibility
@@ -373,10 +372,6 @@ circumstances:
 - =no-filename=
 - =empty-path=
 - =root-no-parent=
-
-* Further Work
-
-- Windows support
 
 * See Also
 
