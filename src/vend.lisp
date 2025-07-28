@@ -176,6 +176,7 @@ Commands:
   check  [focus] - Check your dependencies for issues
   get            - Download all project dependencies into 'vendored/'
   graph  [focus] - Visualise a graph of transitive project dependencies
+  eval   [sexps] - Evaluate SEXPs in the current project
   init   [name]  - Create a minimal project skeleton
   repl   [args]  - Start a Lisp session with only your vendored ASDF systems
   search [term]  - Search known systems
@@ -186,16 +187,17 @@ Flags:
   --version - Display the current version of vend
 ")
 
-(defconstant +vend-rules+
+(defparameter +vend-rules+
   '((("--help" "-h") 0 (vend/help))
     ("--version" 0 (format t "0.2.0~%"))
     ("check"  1 (vend/check :focus (cadr 1)) :stop)
+    ("eval"   1 (vend/eval (cdr 1)) :stop)
     ("get"    0 (vend/get))
     ("graph"  1 (vend/graph :focus (cadr 1)) :stop)
     ("init"   1 (vend/init (cadr 1)) :stop)
-    ("repl"   1 (vend/repl (rest 1)) :stop)
+    ("repl"   1 (vend/repl (cdr 1)) :stop)
     ("search" 1 (vend/search 1))
-    ("test"   1 (vend/test (rest 1)) :stop)))
+    ("test"   1 (vend/test (cdr 1)) :stop)))
 
 (defun vend/help ()
   (princ +help+))
@@ -236,11 +238,34 @@ Flags:
 
 (defun vend/repl (args)
   "Start a given repl."
-  (let* ((compiler (or (car args) "sbcl"))
-         (eval (eval-flag compiler))
+  (cond ((compiler? (car args)) (evaluate (car args) (cdr args)))
+        (t (evaluate "sbcl" args))))
+
+(defun vend/eval (args)
+  "Evaluate some Lisp in the context of the local project, then exit."
+  (multiple-value-bind (compiler extra) (eval-args args)
+    (evaluate compiler '() extra)))
+
+(defun eval-args (args)
+  "Form the CLI args necessary for an `--eval' call."
+  (multiple-value-bind (compiler sexps)
+      (cond ((compiler? (car args)) (values (car args) (cadr args)))
+            (t (values "sbcl" (car args))))
+    (let* ((eval  (eval-flag compiler))
+           (split (t:transduce (t:comp #'t:sexp (t:intersperse eval) (t:once eval)) #'t:cons sexps)))
+      (values compiler (append split (list eval (exit-cmd compiler)))))))
+
+#+nil
+(eval-args '("ecl" "(+ 1 1)"))
+#+nil
+(eval-args '("(+ 1 1)"))
+
+(defun evaluate (compiler args &optional extra)
+  "Evaluate some Lisp in the requested REPL."
+  (let* ((eval (eval-flag compiler))
          (load (list eval +require-asdf+ eval +init-registry+))
          (clisp (if (clisp? compiler) '("-repl") '())))
-    (ext:run-program compiler (append (cdr args) clisp load) :output t :input *standard-input*)))
+    (ext:run-program compiler (append args clisp load extra) :output t :input *standard-input*)))
 
 (defun main ()
   (let ((ext:*lisp-init-file-list* nil)
@@ -255,6 +280,3 @@ Flags:
 ;; https://github.com/sharplispers/ironclad/blob/master/ironclad.asd
 ;; https://github.com/sharplispers/chipz/blob/master/chipz.asd
 ;; https://github.com/rpav/fast-io/blob/master/fast-io.asd#L15
-
-#++
-(t:transduce (t:comp (t:once 2) (t:once 1)) #'t:cons '(3 4 5))

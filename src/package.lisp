@@ -13,6 +13,7 @@
 
 ;; --- Strings --- ;;
 
+;; FIXME: 2025-07-28 Use `string=' instead. Benchmark the difference first though.
 (defun string-starts-with? (string prefix &key (from 0))
   (let ((pos (mismatch prefix string :start2 from)))
     (or (null pos)
@@ -76,12 +77,25 @@
 
 ;; --- Compiler --- ;;
 
+(defparameter *compilers* '("sbcl" "ecl" "abcl" "alisp" "clasp" "ccl" "clisp"))
+
 (defun clisp? (compiler)
   "Is this clisp?"
-  (string-equal "clisp" compiler))
+  (string= "clisp" compiler))
+
+(defun compiler? (arg)
+  "Does the given CLI arg refer to a known compiler?"
+  (member arg *compilers* :test #'string=))
 
 (defun eval-flag (compiler)
   "The flag necessary to directly inject Lisp into a new REPL."
-  (cond ((string-equal "alisp" compiler) "-e")
+  (cond ((string= "alisp" compiler) "-e")
         ((clisp? compiler) "-x")
         (t "--eval")))
+
+(defun exit-cmd (compiler)
+  "The compiler-specific command to exit the REPL."
+  (cond ((string= "sbcl" compiler) "(sb-ext:exit)")
+        ((string= "ecl" compiler) "(ext:quit 0)")
+        ;; Assume SBCL if no compiler was given, or it was unrecognized.
+        (t "(sb-ext:exit)")))
