@@ -351,6 +351,7 @@ map back to the parent, such that later only one git clone is performed.")
     :flexichain      "https://github.com/robert-strandh/Flexichain.git"
     :float-features  "https://github.com/Shinmera/float-features.git"
     :flow            "https://github.com/Shinmera/flow.git"
+    :fluent          "https://github.com/fosskers/fluent.git"
     :fn              "https://github.com/cbaggers/fn.git"
     :fn-macro        "https://github.com/fosskers/fn-macro.git"
     :fold            "https://github.com/jrm-code-project/fold.git"
