@@ -459,7 +459,7 @@ please [[https://github.com/fosskers/vend/issues][open an Issue]].
 
 * Compiler Compatibility
 
-=vend repl= works with the following compilers:
+=vend repl= and =eval= work with the following compilers:
 
 | Compiler  | Status | Notes               |
 |-----------+--------+---------------------|

@@ -96,14 +96,10 @@
 (defun extra-flags (compiler)
   "Extra flags to pass to the compiler. The first list is for 'priority' flags that
 must come before any '--eval' flags."
-  (cond ((string= "sbcl" compiler) (values '("--noinform" "--non-interactive") '()))
-        ((string= "ecl" compiler) (values '() '("--eval" "(ext:quit 0)")))
-        ((string= "abcl" compiler) (values '("--noinform") '("--eval" "(ext:quit)")))))
+  (cond ((string= "sbcl" compiler)  (values '("--noinform" "--non-interactive") '()))
+        ((string= "ecl" compiler)   (values '() '("--eval" "(ext:quit 0)")))
+        ((string= "abcl" compiler)  (values '("--noinform") '("--eval" "(ext:quit)")))
+        ((string= "alisp" compiler) (values '() '("--kill")))
+        ((string= "clisp" compiler) (values '("--silent") '("-x" "(ext:quit)")))
+        ((string= "ccl" compiler)   (values '() '("--eval" "(ccl:quit)")))))
 
-#+nil
-(defun exit-cmd (compiler)
-  "The compiler-specific command to exit the REPL."
-  (cond ((string= "sbcl" compiler) "(sb-ext:exit)")
-        ((string= "ecl" compiler) "(ext:quit 0)")
-        ;; Assume SBCL if no compiler was given, or it was unrecognized.
-        (t "(sb-ext:exit)")))
