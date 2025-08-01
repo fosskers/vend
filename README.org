@@ -33,13 +33,14 @@ It's time for some peace of mind.
 - [[#usage][Usage]]
   - [[#vend-get][vend get]]
   - [[#vend-repl][vend repl]]
-  - [[#vend-graph][vend graph]]
   - [[#vend-check][vend check]]
+  - [[#vend-eval][vend eval]]
+  - [[#vend-graph][vend graph]]
+  - [[#vend-init][vend init]]
   - [[#vend-search][vend search]]
   - [[#vend-test][vend test]]
     - [[#setup][Setup]]
     - [[#integrations][Integrations]]
-  - [[#vend-init][vend init]]
 - [[#ci-integration][CI Integration]]
 - [[#coverage][Coverage]]
 - [[#compiler-compatibility][Compiler Compatibility]]
@@ -251,6 +252,33 @@ additional settings for hungry projects like [[https://github.com/Shirakumo/tria
 > vend repl sbcl --dynamic-space-size 4GB
 #+end_example
 
+** vend check
+
+Since your dependencies are your code, you should care about what's in there.
+
+#+begin_example
+> vend check
+DYNAMIC-CLASSES is deprecated.
+  PGLOADER -> CL-MARKDOWN -> DYNAMIC-CLASSES
+TRIVIAL-BACKTRACE is deprecated.
+  PGLOADER -> TRIVIAL-BACKTRACE
+#+end_example
+
+Woops! And while Common Lisp has a culture of "done means done, not dead", it's
+still important to know what you're getting yourself into.
+
+** vend eval
+
+Run arbitrary Lisp code with all your dependencies available.
+
+#+begin_example
+> vend eval "(asdf:load-system :transducers) (in-package :transducers) (princ (transduce #'pass #'first '(1)))"
+#+end_example
+
+You can pass as many s-expressions as you want within the argument string.
+Useful also for scripting; you can load a known system and run any function
+within it.
+
 ** vend graph
 
 After running =vend get=, you can inspect your full dependency graph via =vend graph=:
@@ -285,20 +313,23 @@ vend graph lem
 In the case of the large [[https://github.com/lem-project/lem][Lem]] project, this would display a graph of only the
 core application and not its test suites, etc.
 
-** vend check
+** vend init
 
-Since your dependencies are your code, you should care about what's in there.
+If you don't even have a project yet, =vend init= will create a simple skeleton
+for you.
 
 #+begin_example
-> vend check
-DYNAMIC-CLASSES is deprecated.
-  PGLOADER -> CL-MARKDOWN -> DYNAMIC-CLASSES
-TRIVIAL-BACKTRACE is deprecated.
-  PGLOADER -> TRIVIAL-BACKTRACE
+> vend init foo
 #+end_example
 
-Woops! And while Common Lisp has a culture of "done means done, not dead", it's
-still important to know what you're getting yourself into.
+This generates:
+
+#+begin_example
+foo
+├── foo.asd
+└── src
+    └── package.lisp
+#+end_example
 
 ** vend search
 
@@ -361,24 +392,6 @@ naive =(asdf:test-system :foo)= call. However, this will not yield the correct
 error code to the terminal in the event of test failures.
 
 If you desire integration with libraries not listed here, please [[https://github.com/fosskers/vend/issues][open an Issue]].
-** vend init
-
-If you don't even have a project yet, =vend init= will create a simple skeleton
-for you.
-
-#+begin_example
-> vend init foo
-#+end_example
-
-This generates:
-
-#+begin_example
-foo
-├── foo.asd
-└── src
-    └── package.lisp
-#+end_example
-
 * CI Integration
 
 A [[https://github.com/marketplace/actions/common-lisp-testing][Github Action]] is available that utilises =vend=. In the simplest case:
