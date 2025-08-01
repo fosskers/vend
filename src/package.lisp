@@ -93,6 +93,14 @@
         ((clisp? compiler) "-x")
         (t "--eval")))
 
+(defun extra-flags (compiler)
+  "Extra flags to pass to the compiler. The first list is for 'priority' flags that
+must come before any '--eval' flags."
+  (cond ((string= "sbcl" compiler) (values '("--noinform" "--non-interactive") '()))
+        ((string= "ecl" compiler) (values '() '("--eval" "(ext:quit 0)")))
+        ((string= "abcl" compiler) (values '("--noinform") '("--eval" "(ext:quit)")))))
+
+#+nil
 (defun exit-cmd (compiler)
   "The compiler-specific command to exit the REPL."
   (cond ((string= "sbcl" compiler) "(sb-ext:exit)")

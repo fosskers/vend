@@ -243,8 +243,8 @@ Flags:
 
 (defun vend/eval (args)
   "Evaluate some Lisp in the context of the local project, then exit."
-  (multiple-value-bind (compiler extra) (eval-args args)
-    (evaluate compiler '() extra)))
+  (multiple-value-bind (compiler priority extra) (eval-args args)
+    (evaluate compiler priority extra)))
 
 (defun eval-args (args)
   "Form the CLI args necessary for an `--eval' call."
@@ -252,13 +252,20 @@ Flags:
       (cond ((compiler? (car args)) (values (car args) (cadr args)))
             (t (values "sbcl" (car args))))
     (let* ((eval  (eval-flag compiler))
-           (split (t:transduce (t:comp #'t:sexp (t:intersperse eval) (t:once eval)) #'t:cons sexps)))
-      (values compiler (append split (list eval (exit-cmd compiler)))))))
+           (split (t:transduce (t:comp #'t:sexp (t:intersperse eval) (t:once eval)) #'t:cons sexps))
+           ;; NOTE: 2025-08-01 If the user passed no s-expressions, we must
+           ;; remove the `--eval' added by the `once' call above, since it's the
+           ;; only thing left in the list.
+           (split (if (null (cdr split)) '() split)))
+      (multiple-value-bind (priority extra) (extra-flags compiler)
+        (values compiler priority (append split extra))))))
 
 #+nil
 (eval-args '("ecl" "(+ 1 1)"))
 #+nil
 (eval-args '("(+ 1 1)"))
+#+nil
+(eval-args '("ecl"))
 
 (defun evaluate (compiler args &optional extra)
   "Evaluate some Lisp in the requested REPL."

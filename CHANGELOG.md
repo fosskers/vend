@@ -1,5 +1,11 @@
 # vend
 
+## Unreleased
+
+#### Added
+
+- `vend eval` for running arbitrary Lisp from the command line with all your dependencies available.
+
 ## 0.2.1 (2025-05-31)
 
 #### Fixed
