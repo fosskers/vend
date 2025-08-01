@@ -505,6 +505,14 @@ See [[file:build.lisp][build.lisp]] for how =vend= is built, which uses ECL. For
                           :executable t
                           :compression t)
 #+end_src
+
+Consider also =vend eval=. For projects that have sufficient build commands
+already set in their =.asd= files, this may be enough:
+
+#+begin_example
+vend eval "(asdf:load-system :waytemp) (asdf:make :waytemp)"
+#+end_example
+
 ** How do I refer to local dependencies?
 
 =vend get= fetches dependencies it knows about via =git=, but sometimes you want to
