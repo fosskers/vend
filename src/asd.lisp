@@ -26,18 +26,16 @@
 
 (defun asd-files (dir &key (shallow nil))
   "Yield the pathnames of all `.asd' files found in the given DIR."
-  (let ((patt (if shallow "*.asd" "**/*.asd")))
-    (sort (directory (p:join dir patt))
-          #'components-less?)))
+  (let* ((patt (if shallow "*.asd" "**/*.asd"))
+         (uniq (t:transduce (t:unique-by #'p:name) #'t:snoc (directory (p:join dir patt)))))
+    (sort uniq #'components-less?)))
 
 #++
 (asd-files "./")
-#++
-(asd-files "/home/colin/code/common-lisp/trial/vendored/com-inuoe-jzon/")
-#++
+#+nil
 (asd-files "/home/colin/code/common-lisp/transducers/vendored/parachute/")
-#++
-(asd-files "/home/colin/code/common-lisp/transducers/vendored/trivial-gray-streams/")
+#+nil
+(asd-files "/home/colin/code/common-lisp/vend-graph-debugging/")
 
 (defun root-asd-files (dir)
   "Yield the pathnames of all `.asd' outside of `vendored/'."

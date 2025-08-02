@@ -29,13 +29,20 @@ names of the added systems."
   "Produce a dependency graph of all systems depended upon by systems of the root
 project. If FOCUS is supplied, only considers the subgraph with that FOCUS as
 the root."
+  (let ((graph (build-graph (ext:getcwd) focus)))
+    (with-open-file (stream #p"deps.dot" :direction :output :if-exists :supersede)
+      (g:to-dot-with-stream graph stream))))
+
+(defun build-graph (path &optional focus)
+  "From the given path, scan systems and build a dependency graph."
   (let* ((graph (g:make-graph))
-         (top   (scan-systems! graph (root-asd-files (ext:getcwd)))))
-    (scan-systems! graph (asd-files (p:join (ext:getcwd) "vendored")))
-    (let ((final (cond (focus (g:subgraph graph (into-keyword focus)))
-                       (t (apply #'g:subgraph graph top)))))
-      (with-open-file (stream #p"deps.dot" :direction :output :if-exists :supersede)
-        (g:to-dot-with-stream final stream)))))
+         (top   (scan-systems! graph (root-asd-files path))))
+    (scan-systems! graph (asd-files (p:join path "vendored")))
+    (cond (focus (g:subgraph graph (into-keyword focus)))
+          (t (apply #'g:subgraph graph top)))))
+
+#+nil
+(g:graph-edges (build-graph #p"/home/colin/code/common-lisp/vend-graph-debugging/"))
 
 ;; --- Search --- ;;
 

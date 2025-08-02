@@ -7,6 +7,11 @@
 - `vend eval` for running arbitrary Lisp from the command line with all your dependencies available.
 - More entries to the registry.
 
+#### Fixed
+
+- When dependencies within `vendored/` were symlinked to another local folder,
+  `vend graph` would occasionally count certain dependencies more than once.
+
 ## 0.2.1 (2025-05-31)
 
 #### Fixed
