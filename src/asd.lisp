@@ -10,12 +10,12 @@
                    ((and (null (cdr ac)) (not (null (cdr bc)))) t)
                    ((and (not (null (cdr ac))) (null (cdr bc))) nil)
                    ((and (null (cdr ac)) (null (cdr bc)))
-                    (string-lessp (p:base (car ac))
-                                  (p:base (car bc))))
+                    (string-lessp (f:base (car ac))
+                                  (f:base (car bc))))
                    ((string-lessp (car ac) (car bc)) t)
                    ((string-lessp (car bc) (car ac)) nil)
                    (t (recurse (cdr ac) (cdr bc))))))
-    (recurse (p:components a) (p:components b))))
+    (recurse (f:components a) (f:components b))))
 
 #++
 (components-less? "trivial-gray-streams.asd" "trivial-gray-streams-test.asd")
@@ -27,7 +27,7 @@
 (defun asd-files (dir &key (shallow nil))
   "Yield the pathnames of all `.asd' files found in the given DIR."
   (let* ((patt (if shallow "*.asd" "**/*.asd"))
-         (uniq (t:transduce (t:unique-by #'p:name) #'t:snoc (directory (p:join dir patt)))))
+         (uniq (t:transduce (t:unique-by #'f:name) #'t:snoc (directory (f:join dir patt)))))
     (sort uniq #'components-less?)))
 
 #++
@@ -40,14 +40,14 @@
 (defun root-asd-files (dir)
   "Yield the pathnames of all `.asd' outside of `vendored/'."
   (t:transduce (t:comp (t:filter (lambda (path)
-                                   (let ((dir (car (last (p:components path)))))
+                                   (let ((dir (car (last (f:components path)))))
                                      (and (not (string= ".git" dir))
                                           (not (string= "vendored" dir))
                                           (not (string= ".qlot" dir))))))
                        (t:map #'asd-files)
                        (t:once (asd-files dir :shallow t))
                        #'t:concatenate)
-               #'t:cons (directory (p:ensure-directory (p:join dir "*/")))))
+               #'t:cons (directory (f:ensure-directory (f:join dir "*/")))))
 
 #++
 (root-asd-files (ext:getcwd))

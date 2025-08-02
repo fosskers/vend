@@ -37,7 +37,7 @@ the root."
   "From the given path, scan systems and build a dependency graph."
   (let* ((graph (g:make-graph))
          (top   (scan-systems! graph (root-asd-files path))))
-    (scan-systems! graph (asd-files (p:join path "vendored")))
+    (scan-systems! graph (asd-files (f:join path "vendored")))
     (cond (focus (g:subgraph graph (into-keyword focus)))
           (t (apply #'g:subgraph graph top)))))
 
@@ -67,7 +67,7 @@ the root."
   "Check the dependency graph for old deps, etc."
   (let* ((graph (g:make-graph))
          (top   (scan-systems! graph (root-asd-files (ext:getcwd)))))
-    (scan-systems! graph (asd-files (p:join (ext:getcwd) "vendored")))
+    (scan-systems! graph (asd-files (f:join (ext:getcwd) "vendored")))
     (let ((final (cond (focus (g:subgraph graph (into-keyword focus)))
                        (t (apply #'g:subgraph graph top)))))
       (t:transduce (t:comp (t:map #'car)
@@ -116,7 +116,7 @@ the root."
              (recurse (top dep)
                (unless (gethash dep cloned)
                  (let ((url  (getf +sources+ dep))
-                       (path (p:ensure-string (p:join target (keyword->string dep)))))
+                       (path (f:ensure-string (f:join target (keyword->string dep)))))
                    (unless (or url (probe-file path))
                      (let ((route (reverse (car (g:paths-to graph dep)))))
                        (error "~a is not a known system.~%~%  ~{~a~^ -> ~}~%~%Please have it registered in the vend source code." (bold-red dep) route)))
@@ -137,7 +137,7 @@ the root."
 
 #++
 (let* ((cwd #p"/home/colin/code/common-lisp/rtg-math/")
-       (dir (p:ensure-directory (p:join cwd "vendored"))))
+       (dir (f:ensure-directory (f:join cwd "vendored"))))
   (work cwd dir))
 
 ;; --- Project Initialization --- ;;
@@ -164,12 +164,12 @@ the root."
 
 (defun vend/init (name)
   "Given the name of a project, create a simple directory structure with a minimal .asd file."
-  (ensure-directories-exist (p:ensure-directory (p:join name "src")))
-  (with-open-file (f (p:join name (p:with-extension name "asd"))
+  (ensure-directories-exist (f:ensure-directory (f:join name "src")))
+  (with-open-file (f (f:join name (f:with-extension name "asd"))
                      :direction :output
                      :if-does-not-exist :create)
     (format f +defsystem-template+ name))
-  (with-open-file (f (p:join name "src" "package.lisp")
+  (with-open-file (f (f:join name "src" "package.lisp")
                      :direction :output
                      :if-does-not-exist :create)
     (format f +defpackage-template+ name name)))
@@ -212,7 +212,7 @@ Flags:
 (defun vend/get ()
   "Download all dependencies."
   (let* ((cwd (ext:getcwd))
-         (dir (p:ensure-directory (p:join cwd "vendored"))))
+         (dir (f:ensure-directory (f:join cwd "vendored"))))
     (vlog "Downloading dependencies.")
     (handler-bind ((error (lambda (c)
                             (format t "~a~%" c)

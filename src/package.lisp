@@ -1,7 +1,7 @@
 (defpackage vend
   (:use :cl)
   (:local-nicknames (#:g #:simple-graph)
-                    (#:p #:filepaths)
+                    (#:f #:filepaths)
                     (#:t #:transducers))
   (:export #:main)
   (:documentation "Simply vendor your Common Lisp project dependencies."))
