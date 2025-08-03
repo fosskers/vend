@@ -1,11 +1,12 @@
 # vend
 
-## Unreleased
+## 0.3.0 (2025-08-04)
 
 #### Added
 
 - `vend eval` for running arbitrary Lisp from the command line with all your dependencies available.
 - More entries to the registry.
+- A `Makefile`.
 
 #### Fixed
 

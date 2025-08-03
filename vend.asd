@@ -1,5 +1,5 @@
 (defsystem "vend"
-  :version "0.2.1"
+  :version "0.3.0"
   :author "Colin Woodbury <colin@fosskers.ca>"
   :license "MPL-2.0"
   :homepage "https://github.com/fosskers/vend"
