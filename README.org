@@ -120,6 +120,13 @@ manage projects of any underlying compiler (see =vend repl=).
 =vend='s dependencies are all vendored, so it is enough to run:
 
 #+begin_example
+make
+make install
+#+end_example
+
+or manually:
+
+#+begin_example
 ecl --load build.lisp
 mv vend ~/.local/bin/
 #+end_example
