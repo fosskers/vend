@@ -181,9 +181,9 @@ the root."
 
 Commands:
   check  [focus] - Check your dependencies for issues
+  eval   [sexps] - Evaluate SEXPs in the current project
   get            - Download all project dependencies into 'vendored/'
   graph  [focus] - Visualise a graph of transitive project dependencies
-  eval   [sexps] - Evaluate SEXPs in the current project
   init   [name]  - Create a minimal project skeleton
   repl   [args]  - Start a Lisp session with only your vendored ASDF systems
   search [term]  - Search known systems
