@@ -13,11 +13,10 @@
 
 ;; --- Strings --- ;;
 
-;; FIXME: 2025-07-28 Use `string=' instead. Benchmark the difference first though.
-(defun string-starts-with? (string prefix &key (from 0))
-  (let ((pos (mismatch prefix string :start2 from)))
-    (or (null pos)
-        (>= pos (length prefix)))))
+(declaim (ftype (function (string string &key (:from fixnum)) boolean) string-starts-with?))
+(defun string-starts-with? (s prefix &key (from 0))
+  (string= prefix s :start2 from :end2 (min (+ from (length prefix))
+                                            (length s))))
 
 #++
 (string-starts-with? "trial-alloy" "trial-")
@@ -46,8 +45,9 @@
 (into-keyword 'foo)
 
 (defun keyword->string (kw)
+  "Get the string of keyword in a form suitable for becoming a filename."
   (t:transduce (t:map (lambda (c) (if (equal #\. c) #\-  c)))
-               #'t:string (string-downcase (format nil "~a" kw))))
+               #'t:string (string-downcase (symbol-name kw))))
 
 #++
 (keyword->string :KW)
@@ -102,4 +102,3 @@ must come before any '--eval' flags."
         ((string= "alisp" compiler) (values '() '("--kill")))
         ((string= "clisp" compiler) (values '("--silent") '("-x" "(ext:quit)")))
         ((string= "ccl" compiler)   (values '() '("--eval" "(ccl:quit)")))))
-
