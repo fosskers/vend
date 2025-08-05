@@ -34,8 +34,6 @@
 (asd-files "./")
 #+nil
 (asd-files "/home/colin/code/common-lisp/transducers/vendored/parachute/")
-#+nil
-(asd-files "/home/colin/code/common-lisp/vend-graph-debugging/")
 
 (defun root-asd-files (dir)
   "Yield the pathnames of all `.asd' outside of `vendored/'."
@@ -54,10 +52,11 @@
 #++
 (root-asd-files "/home/colin/code/common-lisp/zauberwald/")
 
+(declaim (ftype (function (string) boolean) comment?))
 (defun comment? (string)
   "Is the given STRING a comment line?"
   (unless (zerop (length string))
-    (eql #\; (aref string 0))))
+    (char= #\; (char string 0))))
 
 #++
 (comment? "")
@@ -121,6 +120,8 @@
 
 #++
 (asdf-call? (coerce "(asdf:foo)" 'list))
+#++
+(asdf-call? (coerce "(asdf" 'list))
 #++
 (asdf-call? (coerce "(foo)" 'list))
 

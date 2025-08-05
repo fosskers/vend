@@ -34,15 +34,17 @@ the root."
       (g:to-dot-with-stream graph stream))))
 
 (defun build-graph (path &optional focus)
-  "From the given path, scan systems and build a dependency graph."
+  "From the given path, scan systems and build a dependency graph. Assumes you have
+a populated `vendored/' directory already."
   (let* ((graph (g:make-graph))
          (top   (scan-systems! graph (root-asd-files path))))
     (scan-systems! graph (asd-files (f:join path "vendored")))
     (cond (focus (g:subgraph graph (into-keyword focus)))
-          (t (apply #'g:subgraph graph top)))))
+          (top (apply #'g:subgraph graph top))
+          (t (error "No top-level systems found in ~a" path)))))
 
 #+nil
-(g:graph-edges (build-graph #p"/home/colin/code/common-lisp/vend-graph-debugging/"))
+(g:graph-edges (build-graph #p"/home/colin/code/common-lisp/cl-transducers/"))
 
 ;; --- Search --- ;;
 
