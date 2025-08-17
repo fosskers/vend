@@ -468,17 +468,18 @@ please [[https://github.com/fosskers/vend/issues][open an Issue]].
 
 =vend repl= and =eval= work with the following compilers:
 
-| Compiler  | Status | Notes               |
-|-----------+--------+---------------------|
-| SBCL      | ✅     |                     |
-| ECL       | ✅     |                     |
-| ABCL      | ✅     |                     |
-| Clasp     | ✅     |                     |
-| CCL       | ✅     |                     |
-| [[https://gitlab.com/gnu-clisp/clisp][Clisp]]     | ✅     | Doesn't support [[https://gitlab.com/gnu-clisp/clisp/-/merge_requests/3][PLN]] |
-|-----------+--------+---------------------|
-| Allegro   | ✅     |                     |
-| LispWorks | ❓     |                     |
+| Compiler  | Status | Notes                 |
+|-----------+--------+-----------------------|
+| SBCL      | ✅    |                       |
+| ECL       | ✅    |                       |
+| ABCL      | ✅    |                       |
+| CMUCL     | ✅    | From 2025-07 Snapshot |
+| Clasp     | ✅    |                       |
+| CCL       | ✅    |                       |
+| [[https://gitlab.com/gnu-clisp/clisp][Clisp]]     | ✅    | Doesn't support [[https://gitlab.com/gnu-clisp/clisp/-/merge_requests/3][PLN]]   |
+|-----------+--------+-----------------------|
+| Allegro   | ✅    |                       |
+| LispWorks | ❓    |                       |
 
 [[https://wiki.archlinux.org/title/Common_Lisp#Historical][Historical implementations]] are not considered.
 

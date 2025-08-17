@@ -1,5 +1,11 @@
 # vend
 
+## Unreleased
+
+#### Added
+
+- Support for CMUCL.
+
 ## 0.3.0 (2025-08-04)
 
 #### Added

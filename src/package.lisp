@@ -77,7 +77,7 @@
 
 ;; --- Compiler --- ;;
 
-(defparameter *compilers* '("sbcl" "ecl" "abcl" "alisp" "clasp" "ccl" "clisp"))
+(defparameter *compilers* '("sbcl" "ecl" "abcl" "alisp" "clasp" "ccl" "clisp" "cmucl"))
 
 (defun clisp? (compiler)
   "Is this clisp?"
@@ -101,4 +101,5 @@ must come before any '--eval' flags."
         ((string= "abcl" compiler)  (values '("--noinform") '("--eval" "(ext:quit)")))
         ((string= "alisp" compiler) (values '() '("--kill")))
         ((string= "clisp" compiler) (values '("--silent") '("-x" "(ext:quit)")))
-        ((string= "ccl" compiler)   (values '() '("--eval" "(ccl:quit)")))))
+        ((string= "ccl" compiler)   (values '() '("--eval" "(ccl:quit)")))
+        ((string= "cmucl" compiler) (values '("--quiet") '("--eval" "(quit)")))))
