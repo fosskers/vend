@@ -433,6 +433,7 @@ map back to the parent, such that later only one git clone is performed.")
     :lispqr          "https://github.com/mare5x/LispQR.git"
     :local-time      "https://github.com/dlowe-net/local-time.git"
     :log4cl          "https://github.com/sharplispers/log4cl.git"
+    :logfmt          "https://github.com/fosskers/logfmt.git"
     :lorem-ipsum     "https://github.com/phoe/lorem-ipsum.git"
     :lparallel       "https://github.com/lmj/lparallel.git"
     :lquery          "https://github.com/Shinmera/lquery.git"
