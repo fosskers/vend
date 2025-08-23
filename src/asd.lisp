@@ -149,6 +149,26 @@
        (eql #\p (nth 4 chars))
        (eql #\: (nth 5 chars))))
 
+;; For StumpVM.
+(defun uiop-package-call? (chars)
+  (and (eql #\( (nth 0 chars))
+       (eql #\u (nth 1 chars))
+       (eql #\i (nth 2 chars))
+       (eql #\o (nth 3 chars))
+       (eql #\p (nth 4 chars))
+       (eql #\/ (nth 5 chars))
+       (eql #\p (nth 6 chars))
+       (eql #\a (nth 7 chars))
+       (eql #\c (nth 8 chars))
+       (eql #\k (nth 9 chars))
+       (eql #\a (nth 10 chars))
+       (eql #\g (nth 11 chars))
+       (eql #\e (nth 12 chars))
+       (eql #\: (nth 13 chars))))
+
+#+nil
+(uiop-package-call? (coerce "(uiop/package:symbol-call)" 'list))
+
 (defun grovel-call? (chars)
   (and (eql #\( (nth 0 chars))
        (eql #\c (nth 1 chars))
@@ -233,6 +253,9 @@ to continue from."
 #++
 (all-system-strings "")
 
+;; FIXME: 2025-08-23 All this kind of sucks. I'd like there to be a more
+;; principled way to clean up these system definitions, or just read the
+;; dependencies directly.
 (defun sanitize (str)
   "Remove and/or replace a number of naughty forms that prevent `read' from
 succeeding as-is on a given string."
@@ -253,6 +276,8 @@ succeeding as-is on a given string."
                      ((or (asdf-call? chars)
                           (uiop-call? chars))
                       (keep (cons #\( acc) (nthcdr 5 tail)))
+                     ((uiop-package-call? chars)
+                      (keep (cons #\( acc) (nthcdr 13 tail)))
                      ((quoted-asdf-call? chars)
                       (keep (cons #\' acc) (nthcdr 5 tail)))
                      ((command-asdf-call? chars)
@@ -279,6 +304,7 @@ succeeding as-is on a given string."
 :baz (cffi-grovel:grovel-file 1)
 :beep (checkl:tests 1)
 :fruit #.*yes*
+:zoo (uiop/package:symbol-call 1)
 :action asdf:do-it)")
 
 (defun depends-from-system (sexp)

@@ -437,30 +437,31 @@ projects:
 - Compiles: Does =(asdf:load-system :foo)= within =vend repl= complete?
 - Tests: Does =vend test= or =(asdf:test-system :foo)= within =vend repl= pass?
 
-| Project    | Resolves? | Compiles? | Tests? | Category | Notes                               |
-|------------+-----------+-----------+--------+----------+-------------------------------------|
-| [[https://github.com/Shirakumo/alloy][Alloy]]      | ✅       | ✅       | ✅    | UI       |                                     |
-| [[https://github.com/phantomics/april][April]]      | ✅       | ✅       | -      | Language |                                     |
-| [[https://chiselapp.com/user/MistressRemilia/repository/benben/home][Benben]]     | ❌       | -         | -      | Music    | =vend= can't pull Fossil repos        |
-| [[https://github.com/rabbibotton/clog][Clog]]       | ✅       | ✅       | -      | GUI      |                                     |
-| [[https://github.com/coalton-lang/coalton][Coalton]]    | ✅       | ✅       | ✅    | Language |                                     |
-| [[https://github.com/bohonghuang/cl-gtk4][GTK4]]       | ✅       | ✅       | -      | GUI      |                                     |
-| [[https://github.com/Shirakumo/kandria][Kandria]]    | ✅       | ✅       | -      | Game     |                                     |
-| [[https://github.com/lem-project/lem][Lem]]        | ✅       | ❌       | -      | Editor   | Usage of =package-inferred-system=    |
-| [[https://github.com/Lisp-Stat/lisp-stat][Lisp-stat]]  | ✅       | ✅       | -      | Math     |                                     |
-| [[https://codeberg.org/McCLIM/McCLIM][McCLIM]]     | ✅       | ✅       | ✅    | GUI      |                                     |
-| [[https://github.com/fukamachi/mito][Mito]]       | ✅       | ✅       | ✅    | Database |                                     |
-| [[https://codeberg.org/cage/nodgui][Nodgui]]     | ✅       | ✅       | ✅    | GUI      |                                     |
-| [[https://github.com/atlas-engineer/nyxt][Nyxt]]       | ✅       | ✅       | ✅    | Browser  |                                     |
-| [[https://github.com/ocicl/ocicl][OCICL]]      | ✅       | ✅       | -      | Dev tool |                                     |
-| [[https://github.com/marijnh/Postmodern][Postmodern]] | ✅       | ✅       | ✅    | Database |                                     |
-| [[https://github.com/fukamachi/qlot][Qlot]]       | ❌       | -         | -      | Dev tool | Usage of =package-inferred-system=    |
-| [[https://github.com/quicklisp/quicklisp-client][Quicklisp]]  | ✅       | ❌       | -      | Dev tool | System is unloadable: [[https://github.com/quicklisp/quicklisp-client/issues/125][(1)​]] [[https://github.com/quicklisp/quicklisp-client/issues/140][(2)​]]      |
-| [[https://github.com/Shirakumo/radiance][Radiance]]   | ✅       | ✅       | ✅    | Web      |                                     |
-| [[https://github.com/roswell/roswell][Roswell]]    | ✅       | ❌       | -      | Dev tool | Requires =quicklisp= internally       |
-| [[https://codeberg.org/cage/tinmop][Tinmop]]     | ✅       | ✅       | -      | Chat     |                                     |
-| [[https://github.com/Shirakumo/trial][Trial]]      | ✅       | ✅       | ✅    | Gamedev  | [[https://github.com/Shirakumo/trial-assets/][trial-assets]] manual setup for demos |
-| [[https://github.com/fukamachi/woo][Woo]]        | ✅       | ✅       | ❌    | Web      | Usage of =package-inferred-system=    |
+| Project    | Resolves? | Compiles? | Tests? | Category       | Notes                               |
+|------------+-----------+-----------+--------+----------------+-------------------------------------|
+| [[https://github.com/Shirakumo/alloy][Alloy]]      | ✅       | ✅       | ✅    | UI             |                                     |
+| [[https://github.com/phantomics/april][April]]      | ✅       | ✅       | -      | Language       |                                     |
+| [[https://chiselapp.com/user/MistressRemilia/repository/benben/home][Benben]]     | ❌       | -         | -      | Music          | =vend= can't pull Fossil repos        |
+| [[https://github.com/rabbibotton/clog][Clog]]       | ✅       | ✅       | -      | GUI            |                                     |
+| [[https://github.com/coalton-lang/coalton][Coalton]]    | ✅       | ✅       | ✅    | Language       |                                     |
+| [[https://github.com/bohonghuang/cl-gtk4][GTK4]]       | ✅       | ✅       | -      | GUI            |                                     |
+| [[https://github.com/Shirakumo/kandria][Kandria]]    | ✅       | ✅       | -      | Game           |                                     |
+| [[https://github.com/lem-project/lem][Lem]]        | ✅       | ❌       | -      | Editor         | Usage of =package-inferred-system=    |
+| [[https://github.com/Lisp-Stat/lisp-stat][Lisp-stat]]  | ✅       | ✅       | -      | Math           |                                     |
+| [[https://codeberg.org/McCLIM/McCLIM][McCLIM]]     | ✅       | ✅       | ✅    | GUI            |                                     |
+| [[https://github.com/fukamachi/mito][Mito]]       | ✅       | ✅       | ✅    | Database       |                                     |
+| [[https://codeberg.org/cage/nodgui][Nodgui]]     | ✅       | ✅       | ✅    | GUI            |                                     |
+| [[https://github.com/atlas-engineer/nyxt][Nyxt]]       | ✅       | ✅       | ✅    | Browser        |                                     |
+| [[https://github.com/ocicl/ocicl][OCICL]]      | ✅       | ✅       | -      | Dev tool       |                                     |
+| [[https://github.com/marijnh/Postmodern][Postmodern]] | ✅       | ✅       | ✅    | Database       |                                     |
+| [[https://github.com/fukamachi/qlot][Qlot]]       | ❌       | -         | -      | Dev tool       | Usage of =package-inferred-system=    |
+| [[https://github.com/quicklisp/quicklisp-client][Quicklisp]]  | ✅       | ❌       | -      | Dev tool       | System is unloadable: [[https://github.com/quicklisp/quicklisp-client/issues/125][(1)​]] [[https://github.com/quicklisp/quicklisp-client/issues/140][(2)​]]      |
+| [[https://github.com/Shirakumo/radiance][Radiance]]   | ✅       | ✅       | ✅    | Web            |                                     |
+| [[https://github.com/roswell/roswell][Roswell]]    | ✅       | ❌       | -      | Dev tool       | Requires =quicklisp= internally       |
+| [[https://github.com/stumpwm/stumpwm][StumpWM]]    | ✅       | ✅       | ✅    | Window Manager | SBCL-only                           |
+| [[https://codeberg.org/cage/tinmop][Tinmop]]     | ✅       | ✅       | -      | Chat           |                                     |
+| [[https://github.com/Shirakumo/trial][Trial]]      | ✅       | ✅       | ✅    | Gamedev        | [[https://github.com/Shirakumo/trial-assets/][trial-assets]] manual setup for demos |
+| [[https://github.com/fukamachi/woo][Woo]]        | ✅       | ✅       | ❌    | Web            | Usage of =package-inferred-system=    |
 
 If during your usage of =vend= you discover a project that fails to resolve,
 please [[https://github.com/fosskers/vend/issues][open an Issue]].
