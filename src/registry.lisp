@@ -687,6 +687,30 @@ map back to the parent, such that later only one git clone is performed.")
              (t:fold #'max)
              +sources+)
 
+;; Most prolific authors.
+#+nil
+(let* ((quants (t:transduce (t:comp (t:segment 2)
+                                    (t:map #'cadr)
+                                    (t:map (lambda (url)
+                                             (t:transduce (t:comp (t:drop 8)
+                                                                  (t:drop-while (lambda (c) (not (char= c #\/))))
+                                                                  (t:drop 1)
+                                                                  (t:take-while (lambda (c) (not (char= c #\/)))))
+                                                          #'t:string url))))
+                            (t:quantities #'equal) +sources+))
+       (vec (t:transduce #'t:pass #'t:vector quants)))
+  (sort vec #'> :key #'cdr))
+
+;; Most popular platform.
+#+nil
+(t:transduce (t:comp (t:segment 2)
+                     (t:map #'cadr)
+                     (t:map (lambda (url)
+                              (t:transduce (t:comp (t:drop 8)
+                                                   (t:take-while (lambda (c) (not (char= c #\/)))))
+                                           #'t:string url))))
+             (t:quantities #'equal) +sources+)
+
 (defun get-parent (sys)
   (or (getf +parents+ sys)
       (when (string-starts-with? (symbol-name sys) "40ANTS-DOC-") :40ants-doc)
