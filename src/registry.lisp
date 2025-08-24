@@ -431,6 +431,7 @@ map back to the parent, such that later only one git clone is performed.")
     :lisp-unit       "https://github.com/OdonataResearchLLC/lisp-unit.git"
     :lisp-unit2      "https://github.com/AccelerationNet/lisp-unit2.git"
     :lispqr          "https://github.com/mare5x/LispQR.git"
+    :livesupport     "https://github.com/cbaggers/livesupport.git"
     :local-time      "https://github.com/dlowe-net/local-time.git"
     :log4cl          "https://github.com/sharplispers/log4cl.git"
     :logfmt          "https://github.com/fosskers/logfmt.git"
