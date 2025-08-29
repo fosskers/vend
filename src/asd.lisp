@@ -48,7 +48,7 @@
                #'t:cons (directory (f:ensure-directory (f:join dir "*/")))))
 
 #++
-(root-asd-files (ext:getcwd))
+(root-asd-files (uiop:getcwd))
 #++
 (root-asd-files "/home/colin/code/common-lisp/zauberwald/")
 
@@ -452,7 +452,7 @@ while intelligently catching failures."
 (handler-bind ((clunit::test-suite-failure (lambda (c) (declare (ignore c)) (uiop:quit 1))))
   (clunit:run-all-suites :signal-condition-on-fail t :stop-on-fail t)
   (uiop:quit 0))
-" sys)))
+" #|sys|#)))
 
 #++
 (handler-bind ((clunit::test-suite-failure (lambda (c) (declare (ignore c)) (uiop:quit 1))))

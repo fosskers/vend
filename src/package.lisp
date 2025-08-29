@@ -8,9 +8,6 @@
 
 (in-package :vend)
 
-#-ecl
-(error "VEND can only be compiled with ECL.")
-
 ;; --- Strings --- ;;
 
 (declaim (ftype (function (string string &key (:from fixnum)) boolean) string-starts-with?))
@@ -97,9 +94,9 @@
   "Extra flags to pass to the compiler. The first list is for 'priority' flags that
 must come before any '--eval' flags."
   (cond ((string= "sbcl" compiler)  (values '("--noinform" "--non-interactive") '()))
-        ((string= "ecl" compiler)   (values '() '("--eval" "(ext:quit 0)")))
-        ((string= "abcl" compiler)  (values '("--noinform") '("--eval" "(ext:quit)")))
+        ((string= "ecl" compiler)   (values '() '("--eval" "(uiop:quit 0)")))
+        ((string= "abcl" compiler)  (values '("--noinform") '("--eval" "(uiop:quit)")))
         ((string= "alisp" compiler) (values '() '("--kill")))
-        ((string= "clisp" compiler) (values '("--silent") '("-x" "(ext:quit)")))
+        ((string= "clisp" compiler) (values '("--silent") '("-x" "(uiop:quit)")))
         ((string= "ccl" compiler)   (values '() '("--eval" "(ccl:quit)")))
         ((string= "cmucl" compiler) (values '("--quiet") '("--eval" "(quit)")))))
