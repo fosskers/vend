@@ -29,7 +29,7 @@ names of the added systems."
   "Produce a dependency graph of all systems depended upon by systems of the root
 project. If FOCUS is supplied, only considers the subgraph with that FOCUS as
 the root."
-  (let ((graph (build-graph (uiop:getcwd) focus)))
+  (let ((graph (build-graph (getcwd) focus)))
     (with-open-file (stream #p"deps.dot" :direction :output :if-exists :supersede)
       (g:to-dot-with-stream graph stream))))
 
@@ -72,8 +72,8 @@ a populated `vendored/' directory already."
 (defun vend/check (&key focus)
   "Check the dependency graph for old deps, etc."
   (let* ((graph (g:make-graph))
-         (top   (scan-systems! graph (root-asd-files (uiop:getcwd)))))
-    (scan-systems! graph (asd-files (f:join (uiop:getcwd) "vendored")))
+         (top   (scan-systems! graph (root-asd-files (getcwd)))))
+    (scan-systems! graph (asd-files (f:join (getcwd) "vendored")))
     (let ((final (cond (focus (g:subgraph graph (into-keyword focus)))
                        (t (apply #'g:subgraph graph top)))))
       (t:transduce (t:comp (t:map #'car)
@@ -103,7 +103,7 @@ a populated `vendored/' directory already."
   "Given a source URL to clone from, do a shallow git clone into a given absolute PATH."
   (unless (probe-file path)
     (multiple-value-bind (stream code obj)
-        (uiop:run-program (list "git" "clone" "--quiet" "--depth=1" url path) :output t)
+        (run-program (list "git" "clone" "--quiet" "--depth=1" url path))
       (declare (ignore stream obj))
       (assert (= 0 code) nil "Clone failed: ~a" url))))
 
@@ -147,29 +147,24 @@ a populated `vendored/' directory already."
   (work cwd dir))
 
 ;; --- Project Initialization --- ;;
-(defmacro only-once (&body body)
-  `(defvar ,(gensym) (progn ,@body))
-  )
+(defparameter +defsystem-template+
+  "(defsystem \"~a\"
+  :version \"0.0.0\"
+  :author \"\"
+  :license \"\"
+  :homepage \"\"
+  :depends-on ()
+  :serial t
+  :components ((:module \"src\" :components ((:file \"package\"))))
+  :description \"\")
+")
+(defparameter +defpackage-template+
+  "(defpackage ~a
+  (:use :cl)
+  (:documentation \"\"))
 
-(only-once
-  (defconstant +defsystem-template+
-    "(defsystem \"~a\"
-    :version \"0.0.0\"
-    :author \"\"
-    :license \"\"
-    :homepage \"\"
-    :depends-on ()
-    :serial t
-    :components ((:module \"src\" :components ((:file \"package\"))))
-    :description \"\")
-  ")
-  (defconstant +defpackage-template+
-    "(defpackage ~a
-    (:use :cl)
-    (:documentation \"\"))
-  
-  (in-package :~a)
-  "))
+(in-package :~a)
+")
 
 (defun vend/init (name)
   "Given the name of a project, create a simple directory structure with a minimal .asd file."
@@ -185,40 +180,39 @@ a populated `vendored/' directory already."
 
 ;; --- Executable --- ;;
 
-(only-once 
-  (defconstant +help+
-    "vend - Vendor your Common Lisp dependencies
-  
-  Commands:
-    check  [focus] - Check your dependencies for issues
-    eval   [sexps] - Evaluate SEXPs in the current project
-    get            - Download all project dependencies into 'vendored/'
-    graph  [focus] - Visualise a graph of transitive project dependencies
-    init   [name]  - Create a minimal project skeleton
-    repl   [args]  - Start a Lisp session with only your vendored ASDF systems
-    search [term]  - Search known systems
-    test   [args]  - Run all detected test systems
-  
-  Flags:
-    --help    - Display this help message
-    --version - Display the current version of vend
-  "))
+(defparameter +help+
+  "vend - Vendor your Common Lisp dependencies
+
+Commands:
+  check  [focus] - Check your dependencies for issues
+  eval   [sexps] - Evaluate SEXPs in the current project
+  get            - Download all project dependencies into 'vendored/'
+  graph  [focus] - Visualise a graph of transitive project dependencies
+  init   [name]  - Create a minimal project skeleton
+  repl   [args]  - Start a Lisp session with only your vendored ASDF systems
+  search [term]  - Search known systems
+  test   [args]  - Run all detected test systems
+
+Flags:
+  --help    - Display this help message
+  --version - Display the current version of vend
+")
 
 (defun vend/help ()
   (princ +help+))
 
 (defun vend/get ()
   "Download all dependencies."
-  (let* ((cwd (uiop:getcwd))
+  (let* ((cwd (getcwd))
          (dir (f:ensure-directory (f:join cwd "vendored"))))
     (vlog "Downloading dependencies.")
     (handler-bind ((error (lambda (c)
                             (format t "~a~%" c)
-                            (uiop:quit 1))))
+                            (quit 1))))
       (work cwd dir))
     (vlog "Done.")))
 
-(defun vend/test (args &key (dir (uiop:getcwd)))
+(defun vend/test (args &key (dir (getcwd)))
   "Run detected test systems."
   (let* ((compiler (or (car args) "sbcl"))
          (eval (eval-flag compiler))
@@ -233,10 +227,10 @@ a populated `vendored/' directory already."
                                #'t:cons (append (list +require-asdf+ +init-registry+) tests))))
         (vlog "Running tests.")
         (multiple-value-bind (stream code state)
-            (uiop:run-program (append (list compiler) (cdr args) clisp exps) :output *standard-output*)
+            (run-program (append (list compiler) (cdr args) clisp exps) :output t )
           (declare (ignore stream state))
           (unless (zerop code)
-            (uiop:quit 1)))))))
+            (quit 1)))))))
 
 #++
 (vend/test '() :dir #p"/home/colin/code/common-lisp/filepaths/")
@@ -277,21 +271,20 @@ a populated `vendored/' directory already."
   (let* ((eval (eval-flag compiler))
          (load (list eval +require-asdf+ eval +init-registry+))
          (clisp (if (clisp? compiler) '("-repl") '())))
-    (uiop:run-program (append (list compiler) args clisp load extra) :output t :input *standard-input*)))
+    (run-program (append (list compiler) args clisp load extra))))
 
 (defun expect-n-args (args count)
   (unless (= (length args) count)
     (format t "[Error] Incorrect number of arguments, expected ~a args, got ~a~%"
             count (length args))
     (vend/help)
-    (uiop:quit 1)
+    (quit 1)
     ))
 
 (defun process-cli-args (args)
   (let* ((sub-args (cdr args))
          (cmd (car args))
          )
-    (declare ((simple-array character) cmd))
     (cond
       ((string= cmd "--help")    (expect-n-args args 1) (vend/help))
       ((string= cmd "--version") (expect-n-args args 1) (format t "0.3.0~%"))
@@ -305,12 +298,12 @@ a populated `vendored/' directory already."
       ((string= cmd "test")      (expect-n-args args 2) (vend/test sub-args))
       (t                                                (vend/help))
       )
-    (uiop:quit 0)
+    (quit 0)
     ))
 
 (defun main ()
-  (process-cli-args (uiop:command-line-arguments))
-     (uiop:quit 0))
+  (process-cli-args (command-line-arguments))
+     (quit 0))
 
 ;; Bad boys:
 ;; https://github.com/slyrus/opticl/blob/master/opticl-doc.asd

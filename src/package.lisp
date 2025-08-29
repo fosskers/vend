@@ -1,10 +1,12 @@
-(defpackage vend
-  (:use :cl)
-  (:local-nicknames (#:g #:simple-graph)
-                    (#:f #:filepaths)
-                    (#:t #:transducers))
-  (:export #:main)
-  (:documentation "Simply vendor your Common Lisp project dependencies."))
+(eval-when (:load-toplevel :compile-toplevel :execute)
+  (defpackage vend
+    (:use :cl)
+    (:local-nicknames (#:g #:simple-graph)
+                      (#:f #:filepaths)
+                      (#:t #:transducers))
+    (:export #:main)
+    (:documentation "Simply vendor your Common Lisp project dependencies."))
+  )
 
 (in-package :vend)
 

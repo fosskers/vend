@@ -48,7 +48,7 @@
                #'t:cons (directory (f:ensure-directory (f:join dir "*/")))))
 
 #++
-(root-asd-files (uiop:getcwd))
+(root-asd-files (getcwd))
 #++
 (root-asd-files "/home/colin/code/common-lisp/zauberwald/")
 
@@ -423,7 +423,7 @@ while intelligently catching failures."
 #++
 (let* ((status (parachute:status (parachute:test :~a)))
        (code (if (eq :passed status) 0 1)))
-  (uiop:quit code))
+  (quit code))
 
 (defun asdf-test-system (sys)
   "Just a normal `test-system' call."
@@ -443,7 +443,7 @@ while intelligently catching failures."
 (multiple-value-bind (status obj foo) (~a:all-tests)
   (declare (ignore obj foo))
   (let ((code (if status 0 1)))
-    (uiop:quit code)))
+    (quit code)))
 
 (defun clunit2-test (sys)
   "Generate the structure of a clunit2 test from a given system name."
@@ -455,6 +455,6 @@ while intelligently catching failures."
 " #|sys|#)))
 
 #++
-(handler-bind ((clunit::test-suite-failure (lambda (c) (declare (ignore c)) (uiop:quit 1))))
+(handler-bind ((clunit::test-suite-failure (lambda (c) (declare (ignore c)) (quit 1))))
   (clunit:run-all-suites :signal-condition-on-fail t :stop-on-fail t)
-  (uiop:quit 0))
+  (quit 0))
