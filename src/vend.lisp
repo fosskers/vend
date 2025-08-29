@@ -5,7 +5,7 @@
 ;; --- Constants --- ;;
 
 (defparameter +require-asdf+ "(require \"asdf\")")
-(defparameter +init-registry+ "(asdf:initialize-source-registry `(:source-registry (:tree ,(uiop:getcwd)) :ignore-inherited-configuration))")
+(defparameter +init-registry+ "(asdf:initialize-source-registry `(:source-registry (:tree ,(getcwd)) :ignore-inherited-configuration))")
 
 ;; --- Graph --- ;;
 
@@ -103,7 +103,7 @@ a populated `vendored/' directory already."
   "Given a source URL to clone from, do a shallow git clone into a given absolute PATH."
   (unless (probe-file path)
     (multiple-value-bind (stream code obj)
-        (run-program (list "git" "clone" "--quiet" "--depth=1" url path))
+        (run-program (list "git" "clone" "--quiet" "--depth=1" url path) :output t)
       (declare (ignore stream obj))
       (assert (= 0 code) nil "Clone failed: ~a" url))))
 
@@ -227,7 +227,7 @@ Flags:
                                #'t:cons (append (list +require-asdf+ +init-registry+) tests))))
         (vlog "Running tests.")
         (multiple-value-bind (stream code state)
-            (run-program (append (list compiler) (cdr args) clisp exps) :output t )
+            (run-program (append (list compiler) (cdr args) clisp exps) :output *standard-output* )
           (declare (ignore stream state))
           (unless (zerop code)
             (quit 1)))))))

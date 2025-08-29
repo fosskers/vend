@@ -96,9 +96,9 @@
   "Extra flags to pass to the compiler. The first list is for 'priority' flags that
 must come before any '--eval' flags."
   (cond ((string= "sbcl" compiler)  (values '("--noinform" "--non-interactive") '()))
-        ((string= "ecl" compiler)   (values '() '("--eval" "(uiop:quit 0)")))
-        ((string= "abcl" compiler)  (values '("--noinform") '("--eval" "(uiop:quit)")))
+        ((string= "ecl" compiler)   (values '() '("--eval" "(quit 0)")))
+        ((string= "abcl" compiler)  (values '("--noinform") '("--eval" "(quit)")))
         ((string= "alisp" compiler) (values '() '("--kill")))
-        ((string= "clisp" compiler) (values '("--silent") '("-x" "(uiop:quit)")))
+        ((string= "clisp" compiler) (values '("--silent") '("-x" "(quit)")))
         ((string= "ccl" compiler)   (values '() '("--eval" "(ccl:quit)")))
         ((string= "cmucl" compiler) (values '("--quiet") '("--eval" "(quit)")))))
