@@ -152,7 +152,7 @@ a populated `vendored/' directory already."
   )
 
 (only-once
-  (defconstant +vend-defsystem-template+
+  (defconstant +defsystem-template+
     "(defsystem \"~a\"
     :version \"0.0.0\"
     :author \"\"
@@ -163,7 +163,7 @@ a populated `vendored/' directory already."
     :components ((:module \"src\" :components ((:file \"package\"))))
     :description \"\")
   ")
-  (defconstant +vend-defpackage-template+
+  (defconstant +defpackage-template+
     "(defpackage ~a
     (:use :cl)
     (:documentation \"\"))
@@ -177,11 +177,11 @@ a populated `vendored/' directory already."
   (with-open-file (f (f:join name (f:with-extension name "asd"))
                      :direction :output
                      :if-does-not-exist :create)
-    (format f +vend-defsystem-template+ name))
+    (format f +defsystem-template+ name))
   (with-open-file (f (f:join name "src" "package.lisp")
                      :direction :output
                      :if-does-not-exist :create)
-    (format f +vend-defpackage-template+ name name)))
+    (format f +defpackage-template+ name name)))
 
 ;; --- Executable --- ;;
 
@@ -203,20 +203,6 @@ a populated `vendored/' directory already."
     --help    - Display this help message
     --version - Display the current version of vend
   "))
-
-(defparameter +vend-rules+
-  '((("--help" "-h") 0 (vend/help))
-    ("--version" 0 (format t "0.3.0~%"))
-    ("check"  1 (vend/check :focus (cadr 1)) :stop)
-    ("eval"   1 (vend/eval (cdr 1)) :stop)
-    ("get"    0 (vend/get))
-    ("graph"  1 (vend/graph :focus (cadr 1)) :stop)
-    ("init"   1 (vend/init (cadr 1)) :stop)
-    ("repl"   1 (vend/repl (cdr 1)) :stop)
-    ("search" 1 (vend/search 1))
-    ("test"   1 (vend/test (cdr 1)) :stop)))
-
-    
 
 (defun vend/help ()
   (princ +help+))
@@ -305,6 +291,7 @@ a populated `vendored/' directory already."
   (let* ((sub-args (cdr args))
          (cmd (car args))
          )
+    (declare ((simple-array character) cmd))
     (cond
       ((string= cmd "--help")    (expect-n-args args 1) (vend/help))
       ((string= cmd "--version") (expect-n-args args 1) (format t "0.3.0~%"))

@@ -17,7 +17,7 @@
 (asdf:defsystem "vend/executable"
   :depends-on ("vend")
   :build-operation program-op
-  :build-pathname "vend" ;; shell name
-  :entry-point "vend:main" ;; thunk
+  :build-pathname "vend"
+  :entry-point "vend:main"
   )
 
