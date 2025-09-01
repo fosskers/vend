@@ -25,6 +25,18 @@ names of the added systems."
                                   name))))
                #'t:cons paths))
 
+#+nil
+(systems-from-file #p"/home/colin/code/common-lisp/CIEL/vendored/cmd/cmd.asd")
+
+(defun add-extra-deps! (graph parent deps)
+  "When we somehow know a fixed list of dependencies to associate with a given
+parent, add them to the graph. One instance of where this can occur is when a
+package is known to use PIS, and its dependencies are hard-coded, even though no
+originally system could be found for it."
+  (dolist (dep deps)
+    (g:add-node! graph dep)
+    (g:add-edge! graph parent dep)))
+
 (defun vend/graph (&key focus)
   "Produce a dependency graph of all systems depended upon by systems of the root
 project. If FOCUS is supplied, only considers the subgraph with that FOCUS as
@@ -117,15 +129,26 @@ a populated `vendored/' directory already."
                             #'t:cons (g:leaves g)))
              (recurse (top dep)
                (unless (gethash dep cloned)
-                 (let ((url  (getf +sources+ dep))
-                       (path (f:ensure-string (f:join target (keyword->string dep)))))
-                   (unless (or url (probe-file path))
-                     (let ((route (reverse (car (g:paths-to graph dep)))))
-                       (error "~a is not a known system.~%~%  ~{~a~^ -> ~}~%~%Please have it registered in the vend source code." (bold-red dep) route)))
-                   (vlog "Fetching ~a" (bold dep))
-                   (clone url path)
+                 (let* ((url  (getf +sources+ dep))
+                        (path (f:ensure-string (f:join target (keyword->string dep)))))
+                   (cond
+                     ;; We've already cloned this repository. But note that we
+                     ;; still do a system scan, just in case we've cloned this
+                     ;; particular repo, but perhaps not its dependencies yet.
+                     ((probe-file path)
+                      (vlog "Fetched  ~a" (bold dep))
+                      (scan-systems! graph (asd-files path)))
+                     ;; We don't know of this dependency, but it might be using PIS.
+                     ((not url) (let ((deps (getf +pis+ dep)))
+                                  (when (null deps)
+                                    (let ((route (reverse (car (g:paths-to graph dep)))))
+                                      (error "~a is not a known system.~%~%  ~{~a~^ -> ~}~%~%Please have it registered in the vend source code." (bold-red dep) route))
+                                    (add-extra-deps! graph dep deps))))
+                     ;; We're clear to attempt a fresh clone.
+                     (t (vlog "Fetching ~a" (bold dep))
+                        (clone url path)
+                        (scan-systems! graph (asd-files path))))
                    (setf (gethash dep cloned) t)
-                   (scan-systems! graph (asd-files path))
                    (dolist (leaf (unique-leaves (apply #'g:subgraph graph top)))
                      (recurse top leaf))))))
       (let* ((top  (scan-systems! graph (root-asd-files cwd)))
@@ -138,7 +161,7 @@ a populated `vendored/' directory already."
           (recurse top leaf))))))
 
 #++
-(let* ((cwd #p"/home/colin/code/common-lisp/rtg-math/")
+(let* ((cwd #p"/home/colin/code/common-lisp/CIEL/")
        (dir (f:ensure-directory (f:join cwd "vendored"))))
   (work cwd dir))
 

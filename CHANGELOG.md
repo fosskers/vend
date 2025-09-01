@@ -5,7 +5,7 @@
 #### Added
 
 - Support for CMUCL.
-- More entries to the registry.
+- Many more entries to the registry.
 
 ## 0.3.0 (2025-08-04)
 
