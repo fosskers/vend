@@ -442,7 +442,7 @@ projects:
 | [[https://github.com/Shirakumo/alloy][Alloy]]      | ✅       | ✅       | ✅    | UI             |                                     |
 | [[https://github.com/phantomics/april][April]]      | ✅       | ✅       | -      | Language       |                                     |
 | [[https://chiselapp.com/user/MistressRemilia/repository/benben/home][Benben]]     | ❌       | -         | -      | Music          | =vend= can't pull Fossil repos        |
-| [[https://github.com/ciel-lang/CIEL][CIEL]]       | ✅       | ❌       | -      | Dev tool       | [[https://github.com/lisp-maintainers/file-finder/pull/6][Can't compile file-finder dep]]         |
+| [[https://github.com/ciel-lang/CIEL][CIEL]]       | ✅       | ✅*      | -      | Dev tool       | CCL only                            |
 | [[https://github.com/rabbibotton/clog][Clog]]       | ✅       | ✅       | -      | GUI            |                                     |
 | [[https://github.com/coalton-lang/coalton][Coalton]]    | ✅       | ✅       | ✅    | Language       |                                     |
 | [[https://github.com/bohonghuang/cl-gtk4][GTK4]]       | ✅       | ✅       | -      | GUI            |                                     |
