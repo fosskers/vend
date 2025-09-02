@@ -1,15 +1,14 @@
-(defpackage vend
-  (:use :cl)
-  (:local-nicknames (#:g #:simple-graph)
-                    (#:f #:filepaths)
-                    (#:t #:transducers))
-  (:export #:main)
-  (:documentation "Simply vendor your Common Lisp project dependencies."))
+(eval-when (:load-toplevel :compile-toplevel :execute)
+  (defpackage vend
+    (:use :cl)
+    (:local-nicknames (#:g #:simple-graph)
+                      (#:f #:filepaths)
+                      (#:t #:transducers))
+    (:export #:main)
+    (:documentation "Simply vendor your Common Lisp project dependencies."))
+  )
 
 (in-package :vend)
-
-#-ecl
-(error "VEND can only be compiled with ECL.")
 
 ;; --- Strings --- ;;
 
@@ -97,9 +96,9 @@
   "Extra flags to pass to the compiler. The first list is for 'priority' flags that
 must come before any '--eval' flags."
   (cond ((string= "sbcl" compiler)  (values '("--noinform" "--non-interactive") '()))
-        ((string= "ecl" compiler)   (values '() '("--eval" "(ext:quit 0)")))
-        ((string= "abcl" compiler)  (values '("--noinform") '("--eval" "(ext:quit)")))
+        ((string= "ecl" compiler)   (values '() '("--eval" "(quit 0)")))
+        ((string= "abcl" compiler)  (values '("--noinform") '("--eval" "(quit)")))
         ((string= "alisp" compiler) (values '() '("--kill")))
-        ((string= "clisp" compiler) (values '("--silent") '("-x" "(ext:quit)")))
+        ((string= "clisp" compiler) (values '("--silent") '("-x" "(quit)")))
         ((string= "ccl" compiler)   (values '() '("--eval" "(ccl:quit)")))
         ((string= "cmucl" compiler) (values '("--quiet") '("--eval" "(quit)")))))

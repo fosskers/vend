@@ -4,21 +4,13 @@
 (asdf:initialize-source-registry `(:source-registry (:tree ,(uiop:getcwd)) :ignore-inherited-configuration))
 
 (format t "--- LOADING SYSTEM ---~%")
-(declaim (optimize (speed 3) (debug 1) (safety 1)))
-(asdf:load-system :vend)
-
-#-ecl
-(progn
-  (format t "--- NO OP! ---~%")
-  (format t "Use ECL instead.~%")
-  #+sbcl (sb-ext:exit :code 1))
+(declaim (optimize (speed 3) (debug 1) (safety 1) (space 3)))
 
 #+ecl
-(progn
-  (format t "--- COMPILING EXECUTABLE ---~%")
-  (asdf:make-build :vend
-                   :type :program
-                   :move-here #p"./"
-                   :epilogue-code '(vend:main))
-  (format t "--- DONE ---~%")
-  (ext:quit 0))
+(asdf:load-system :vend)
+
+(format t "--- COMPILING EXECUTABLE ---~%")
+#-ecl (asdf:make :vend)
+#+ecl (asdf:make-build :vend :type :program :move-here #p"./" :epilogue-code '(vend:main))
+(format t "--- DONE ---~%")
+(quit)

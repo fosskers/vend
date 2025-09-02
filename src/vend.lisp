@@ -5,7 +5,7 @@
 ;; --- Constants --- ;;
 
 (defparameter +require-asdf+ "(require \"asdf\")")
-(defparameter +init-registry+ "(asdf:initialize-source-registry `(:source-registry (:tree ,(uiop:getcwd)) :ignore-inherited-configuration))")
+(defparameter +init-registry+ "(asdf:initialize-source-registry `(:source-registry (:tree ,(getcwd)) :ignore-inherited-configuration))")
 
 ;; --- Graph --- ;;
 
@@ -41,7 +41,7 @@ originally system could be found for it."
   "Produce a dependency graph of all systems depended upon by systems of the root
 project. If FOCUS is supplied, only considers the subgraph with that FOCUS as
 the root."
-  (let ((graph (build-graph (ext:getcwd) focus)))
+  (let ((graph (build-graph (getcwd) focus)))
     (with-open-file (stream #p"deps.dot" :direction :output :if-exists :supersede)
       (g:to-dot-with-stream graph stream))))
 
@@ -70,7 +70,11 @@ a populated `vendored/' directory already."
          (longest (t:transduce (t:map (lambda (pair) (length (car pair))))
                                (t:fold #'max 0) matches)))
     (dolist (pair matches)
-      (format t "~va ~a~%" longest (car pair) (cdr pair)))))
+      (format t "~va ~a~%" longest (car pair) (cdr pair)))
+    (when (null matches)
+      (format t "[Error] No matching results for query \"~a\" found" term))
+
+    ))
 
 #++
 (vend/search "nonexistent")
@@ -80,8 +84,8 @@ a populated `vendored/' directory already."
 (defun vend/check (&key focus)
   "Check the dependency graph for old deps, etc."
   (let* ((graph (g:make-graph))
-         (top   (scan-systems! graph (root-asd-files (ext:getcwd)))))
-    (scan-systems! graph (asd-files (f:join (ext:getcwd) "vendored")))
+         (top   (scan-systems! graph (root-asd-files (getcwd)))))
+    (scan-systems! graph (asd-files (f:join (getcwd) "vendored")))
     (let ((final (cond (focus (g:subgraph graph (into-keyword focus)))
                        (t (apply #'g:subgraph graph top)))))
       (t:transduce (t:comp (t:map #'car)
@@ -111,7 +115,7 @@ a populated `vendored/' directory already."
   "Given a source URL to clone from, do a shallow git clone into a given absolute PATH."
   (unless (probe-file path)
     (multiple-value-bind (stream code obj)
-        (ext:run-program "git" (list "clone" "--quiet" "--depth=1" url path) :output t)
+        (run-program (list "git" "clone" "--quiet" "--depth=1" url path) :output t)
       (declare (ignore stream obj))
       (assert (= 0 code) nil "Clone failed: ~a" url))))
 
@@ -166,8 +170,7 @@ a populated `vendored/' directory already."
   (work cwd dir))
 
 ;; --- Project Initialization --- ;;
-
-(defconstant +defsystem-template+
+(defparameter +defsystem-template+
   "(defsystem \"~a\"
   :version \"0.0.0\"
   :author \"\"
@@ -178,8 +181,7 @@ a populated `vendored/' directory already."
   :components ((:module \"src\" :components ((:file \"package\"))))
   :description \"\")
 ")
-
-(defconstant +defpackage-template+
+(defparameter +defpackage-template+
   "(defpackage ~a
   (:use :cl)
   (:documentation \"\"))
@@ -201,7 +203,7 @@ a populated `vendored/' directory already."
 
 ;; --- Executable --- ;;
 
-(defconstant +help+
+(defparameter +help+
   "vend - Vendor your Common Lisp dependencies
 
 Commands:
@@ -219,33 +221,21 @@ Flags:
   --version - Display the current version of vend
 ")
 
-(defparameter +vend-rules+
-  '((("--help" "-h") 0 (vend/help))
-    ("--version" 0 (format t "0.3.0~%"))
-    ("check"  1 (vend/check :focus (cadr 1)) :stop)
-    ("eval"   1 (vend/eval (cdr 1)) :stop)
-    ("get"    0 (vend/get))
-    ("graph"  1 (vend/graph :focus (cadr 1)) :stop)
-    ("init"   1 (vend/init (cadr 1)) :stop)
-    ("repl"   1 (vend/repl (cdr 1)) :stop)
-    ("search" 1 (vend/search 1))
-    ("test"   1 (vend/test (cdr 1)) :stop)))
-
 (defun vend/help ()
   (princ +help+))
 
 (defun vend/get ()
   "Download all dependencies."
-  (let* ((cwd (ext:getcwd))
+  (let* ((cwd (getcwd))
          (dir (f:ensure-directory (f:join cwd "vendored"))))
     (vlog "Downloading dependencies.")
     (handler-bind ((error (lambda (c)
                             (format t "~a~%" c)
-                            (ext:quit 1))))
+                            (quit 1))))
       (work cwd dir))
     (vlog "Done.")))
 
-(defun vend/test (args &key (dir (ext:getcwd)))
+(defun vend/test (args &key (dir (getcwd)))
   "Run detected test systems."
   (let* ((compiler (or (car args) "sbcl"))
          (eval (eval-flag compiler))
@@ -260,10 +250,10 @@ Flags:
                                #'t:cons (append (list +require-asdf+ +init-registry+) tests))))
         (vlog "Running tests.")
         (multiple-value-bind (stream code state)
-            (ext:run-program compiler (append (cdr args) clisp exps) :output *standard-output*)
+            (run-program (append (list compiler) (cdr args) clisp exps) :output *standard-output* )
           (declare (ignore stream state))
           (unless (zerop code)
-            (ext:quit 1)))))))
+            (quit 1)))))))
 
 #++
 (vend/test '() :dir #p"/home/colin/code/common-lisp/filepaths/")
@@ -304,14 +294,39 @@ Flags:
   (let* ((eval (eval-flag compiler))
          (load (list eval +require-asdf+ eval +init-registry+))
          (clisp (if (clisp? compiler) '("-repl") '())))
-    (ext:run-program compiler (append args clisp load extra) :output t :input *standard-input*)))
+    (run-program (append (list compiler) args clisp load extra))))
+
+(defun expect-n-args (args count)
+  (unless (= (length args) count)
+    (format t "[Error] Incorrect number of arguments, expected ~a args, got ~a~%"
+            count (length args))
+    (vend/help)
+    (quit 1)
+    ))
+
+(defun process-cli-args (args)
+  (let* ((sub-args (cdr args))
+         (cmd (car args))
+         )
+    (cond
+      ((string= cmd "--help")    (expect-n-args args 1) (vend/help))
+      ((string= cmd "--version") (expect-n-args args 1) (format t "0.3.0~%"))
+      ((string= cmd "check")     (expect-n-args args 2) (vend/check :focus (car sub-args)))
+      ((string= cmd "eval")                             (vend/eval sub-args))
+      ((string= cmd "get")       (expect-n-args args 1) (vend/get))
+      ((string= cmd "graph")     (expect-n-args args 2) (vend/graph :focus (car sub-args)))
+      ((string= cmd "init")      (expect-n-args args 2) (vend/init (car sub-args)))
+      ((string= cmd "repl")      (expect-n-args args 2) (vend/repl sub-args))
+      ((string= cmd "search")    (expect-n-args args 2) (vend/search (car sub-args)))
+      ((string= cmd "test")      (expect-n-args args 2) (vend/test sub-args))
+      (t                                                (vend/help))
+      )
+    (quit 0)
+    ))
 
 (defun main ()
-  (let ((ext:*lisp-init-file-list* nil)
-        (ext:*help-message* +help+))
-    (cond ((= 1 (length ext:*command-args*)) (vend/help))
-          (t (ext:process-command-args :rules +vend-rules+)))
-    (ext:quit 0)))
+  (process-cli-args (command-line-arguments))
+     (quit 0))
 
 ;; Bad boys:
 ;; https://github.com/slyrus/opticl/blob/master/opticl-doc.asd
