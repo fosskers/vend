@@ -6,6 +6,7 @@
 
 - Support for CMUCL.
 - Many more entries to the registry.
+- A tiny workaround for known packages that use `:package-inferred-system`.
 
 ## 0.3.0 (2025-08-04)
 

@@ -51,12 +51,17 @@ a populated `vendored/' directory already."
   (let* ((graph (g:make-graph))
          (top   (scan-systems! graph (root-asd-files path))))
     (scan-systems! graph (asd-files (f:join path "vendored")))
+    ;; This accounts for the PIS workaround.
+    (t:transduce (t:comp (t:map #'car)
+                         (t:filter (lambda (sys) (getf +pis+ sys))))
+                 (t:for (lambda (sys) (add-extra-deps! graph sys (getf +pis+ sys))))
+                 (g:graph-nodes graph))
     (cond (focus (g:subgraph graph (into-keyword focus)))
           (top (apply #'g:subgraph graph top))
           (t (error "No top-level systems found in ~a" path)))))
 
 #+nil
-(g:graph-edges (build-graph #p"/home/colin/code/common-lisp/cl-transducers/"))
+(g:graph-edges (build-graph #p"/home/colin/code/common-lisp/CIEL/"))
 
 ;; --- Search --- ;;
 
@@ -142,8 +147,8 @@ a populated `vendored/' directory already."
                      ((not url) (let ((deps (getf +pis+ dep)))
                                   (when (null deps)
                                     (let ((route (reverse (car (g:paths-to graph dep)))))
-                                      (error "~a is not a known system.~%~%  ~{~a~^ -> ~}~%~%Please have it registered in the vend source code." (bold-red dep) route))
-                                    (add-extra-deps! graph dep deps))))
+                                      (error "~a is not a known system.~%~%  ~{~a~^ -> ~}~%~%Please have it registered in the vend source code." (bold-red dep) route)))
+                                  (add-extra-deps! graph dep deps)))
                      ;; We're clear to attempt a fresh clone.
                      (t (vlog "Fetching ~a" (bold dep))
                         (clone url path)
