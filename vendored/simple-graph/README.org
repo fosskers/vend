@@ -6,11 +6,10 @@ dependencies.
 
 Keep in mind that:
 
-- Its assumed that the nodes and edges are "light" things like keywords or
-  strings and can be compared via =#'equal=.
+- Nodes are compared via =#'equalp=.
 - All edges are directed.
 - Edge weights are not supported.
-- Other than =subgraph= and =paths-to=, no fancy algorithms are provided.
+- Other than a few conveniences, no fancy algorithms are provided.
 
 * Table of Contents :TOC_5_gh:noexport:
 - [[#compatibility][Compatibility]]
@@ -21,8 +20,10 @@ Keep in mind that:
       - [[#make-graph-graph-nodes-graph-edges][make-graph, graph-nodes, graph-edges]]
       - [[#add-node-add-edge][add-node!, add-edge!]]
       - [[#leaf-leaves][leaf?, leaves]]
+    - [[#algorithms][Algorithms]]
       - [[#nodes-to-paths-to][nodes-to, paths-to]]
       - [[#subgraph][subgraph]]
+      - [[#flip-edges][flip-edges]]
     - [[#visualisation][Visualisation]]
       - [[#to-dot-to-dot-with-stream][to-dot, to-dot-with-stream]]
 
@@ -125,6 +126,9 @@ To fetch all the leaves:
 #+RESULTS:
 : (:C :B)
 
+
+*** Algorithms
+
 **** nodes-to, paths-to
 
 To find all nodes with a directed edge to some given node:
@@ -188,6 +192,26 @@ To yield a new subgraph =graph= that starts from a given node (or nodes):
 :    :EDGES #<HASH-TABLE :TEST EQUAL :COUNT 1 {1008A4C443}>)
 
 If visualised (see =to-dot= below), we would see only =a -> c=.
+
+**** flip-edges
+
+Reverse the direction of all edges.
+
+#+begin_src lisp
+(in-package :simple-graph)
+(let ((g (make-graph)))
+  (add-node! g :a)
+  (add-node! g :b)
+  (add-node! g :c)
+  (add-edge! g :a :b)
+  (add-edge! g :a :c)
+  (flip-edges g))
+#+end_src
+
+#+RESULTS:
+: #S(GRAPH
+:    :NODES #<HASH-TABLE :TEST EQUALP :COUNT 3 {10045720D3}>
+:    :EDGES #<HASH-TABLE :TEST EQUALP :COUNT 2 {10045725B3}>)
 
 *** Visualisation
 
