@@ -623,6 +623,7 @@ map back to the parent, such that later only one git clone is performed.")
     :static-vectors  "https://github.com/sionescu/static-vectors.git"
     :statistics      "https://github.com/Lisp-Stat/statistics.git"
     :stealth-mixin   "https://github.com/robert-strandh/Stealth-mixin.git"
+    :stmx            "https://github.com/cosmos72/stmx.git"
     :str             "https://github.com/vindarel/cl-str.git"
     :string-case     "https://github.com/pkhuong/string-case.git"
     :swank           "https://github.com/slime/slime.git"
