@@ -166,7 +166,7 @@ a populated `vendored/' directory already."
           (recurse top leaf))))))
 
 #++
-(let* ((cwd #p"/home/colin/code/common-lisp/CIEL/")
+(let* ((cwd #p"/home/colin/code/common-lisp/cl-tuition/")
        (dir (f:ensure-directory (f:join cwd "vendored"))))
   (work cwd dir))
 
