@@ -57,6 +57,7 @@
     :north-core :north
     :north-drakma :north
     :nsymbols/star :nsymbols
+    :optima.ppcre :optima
     :persistent :mcclim
     :plump-dom :plump
     :ql-dist :quicklisp
@@ -73,9 +74,6 @@
     ;; NOTE: 2025-01-11 This being here overrides the `trial-' mapping in
     ;; `get-parent' but it is necessary, as `trial-assets' is a separate repo.
     :trial-assets :trial-assets
-    :trivia.balland2006 :trivia
-    :trivia.level2 :trivia
-    :trivia.trivial :trivia
     :ubiquitous-concurrent :ubiquitous
     :uiop :asdf)
   "Systems are often bundled together into a single repository. This list helps
@@ -124,6 +122,7 @@ map back to the parent, such that later only one git clone is performed.")
     :cl-syntax
     :cl-yaml
     :dynamic-classes
+    :optima
     :path-parse
     :prove
     :south
@@ -134,7 +133,8 @@ map back to the parent, such that later only one git clone is performed.")
   "Repositories marked as deprecated or archived by their authors.")
 
 (defparameter +pis+
-  '(:cmd/cmd (:uiop :trivia :shlex :trivial-garbage))
+  '(:cmd/cmd (:uiop :trivia :shlex :trivial-garbage)
+    :cl-scripting/cl-scripting (:uiop))
   "Hard-coded dependency lists for packages known to use Package Inferred Systems.")
 
 ;; TODO: 2024-01-11 Make this a HashTable.
@@ -270,6 +270,7 @@ map back to the parent, such that later only one git clone is performed.")
     :cl-redis        "https://github.com/vseloved/cl-redis.git"
     :cl-reexport     "https://github.com/takagi/cl-reexport.git"
     :cl-resvg        "https://codeberg.org/shirakumo/cl-resvg.git"
+    :cl-scripting    "https://github.com/fare/cl-scripting.git"
     :cl-sendmail     "https://github.com/u-u-h/cl-sendmail.git"
     :cl-setlocale    "https://github.com/shamazmazum/cl-setlocale.git"
     :cl-spark        "https://github.com/tkych/cl-spark.git"
@@ -361,6 +362,7 @@ map back to the parent, such that later only one git clone is performed.")
     :external-program "https://github.com/sellout/external-program.git"
     :event-emitter   "https://github.com/fukamachi/event-emitter.git"
     :fare-csv        "https://gitlab.common-lisp.net/frideau/fare-csv.git"
+    :fare-mop        "https://gitlab.common-lisp.net/frideau/fare-mop.git"
     :fare-quasiquote "https://gitlab.common-lisp.net/frideau/fare-quasiquote.git"
     :fare-utils      "https://gitlab.common-lisp.net/frideau/fare-utils.git"
     :fast-http       "https://github.com/fukamachi/fast-http.git"
@@ -425,6 +427,7 @@ map back to the parent, such that later only one git clone is performed.")
     :ieee-floats     "https://github.com/marijnh/ieee-floats.git"
     :idna            "https://github.com/antifuchs/idna.git"
     :in-nomine       "https://github.com/phoe/in-nomine.git"
+    :inferior-shell  "https://gitlab.common-lisp.net/qitab/inferior-shell.git"
     :introspect-environment "https://github.com/Bike/introspect-environment.git"
     :iolib           "https://github.com/sionescu/iolib.git"
     :inquisitor      "https://github.com/t-sin/inquisitor.git"
@@ -657,6 +660,7 @@ map back to the parent, such that later only one git clone is performed.")
     :trivial-do      "https://github.com/yitzchak/trivial-do.git"
     :trivial-extensible-sequences "https://codeberg.org/shinmera/trivial-extensible-sequences.git"
     :trivial-garbage "https://github.com/trivial-garbage/trivial-garbage.git"
+    :trivial-glob    "https://github.com/fukamachi/trivial-glob.git"
     :trivial-gray-streams "https://github.com/trivial-gray-streams/trivial-gray-streams.git"
     :trivial-features "https://github.com/trivial-features/trivial-features.git"
     :trivial-file-size "https://github.com/ruricolist/trivial-file-size.git"
@@ -767,6 +771,7 @@ map back to the parent, such that later only one git clone is performed.")
       (when (string-starts-with? (symbol-name sys) "40ANTS-DOC-") :40ants-doc)
       (when (string-starts-with? (symbol-name sys) "40ANTS-DOC/") :40ants-doc)
       (when (string-starts-with? (symbol-name sys) "ALLOY-") :alloy)
+      (when (string-starts-with? (symbol-name sys) "ASDF/") :asdf)
       (when (string-starts-with? (symbol-name sys) "CL-MARKLESS-") :cl-markless)
       (when (string-starts-with? (symbol-name sys) "CL-MIXED-") :cl-mixed)
       (when (string-starts-with? (symbol-name sys) "CL-JSON-POINTER/") :cl-json-pointer)
@@ -802,5 +807,6 @@ map back to the parent, such that later only one git clone is performed.")
       (when (string-starts-with? (symbol-name sys) "SWANK/") :swank)
       (when (string-starts-with? (symbol-name sys) "TRANSDUCERS/") :transducers)
       (when (string-starts-with? (symbol-name sys) "TRIAL-") :trial)
+      (when (string-starts-with? (symbol-name sys) "TRIVIA.") :trivia)
       (when (string-starts-with? (symbol-name sys) "TRIVIAL-BATTERY/") :trivial-battery)
       sys))
