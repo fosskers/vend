@@ -27,7 +27,7 @@
 (defun asd-files (dir &key (shallow nil))
   "Yield the pathnames of all `.asd' files found in the given DIR."
   (let* ((patt (if shallow "*.asd" "**/*.asd"))
-         (uniq (t:transduce (t:unique-by #'f:name) #'t:snoc (directory (f:join dir patt)))))
+         (uniq (t:transduce (t:unique-by #'f:name) #'t:snoc (directory (f:join dir patt) :resolve-symlinks nil))))
     (sort uniq #'components-less?)))
 
 #++
