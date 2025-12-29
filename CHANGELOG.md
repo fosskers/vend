@@ -6,6 +6,10 @@
 
 - More entries to the registry.
 
+#### Changed
+
+- `vend init` also generates a `.gitignore`.
+
 #### Fixed
 
 - An infinite recursion bug involving symlinks.

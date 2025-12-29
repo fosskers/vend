@@ -192,6 +192,12 @@ a populated `vendored/' directory already."
 (in-package :~a)
 ")
 
+(defconstant +gitignore-template+
+  "vendored/
+*.fasl
+*.fas
+")
+
 (defun vend/init (name)
   "Given the name of a project, create a simple directory structure with a minimal .asd file."
   (ensure-directories-exist (f:ensure-directory (f:join name "src")))
@@ -202,7 +208,11 @@ a populated `vendored/' directory already."
   (with-open-file (f (f:join name "src" "package.lisp")
                      :direction :output
                      :if-does-not-exist :create)
-    (format f +defpackage-template+ name name)))
+    (format f +defpackage-template+ name name))
+  (with-open-file (f (f:join name ".gitignore")
+                     :direction :output
+                     :if-does-not-exist :create)
+    (format f +gitignore-template+)))
 
 ;; --- Executable --- ;;
 
