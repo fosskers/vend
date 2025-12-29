@@ -1,5 +1,15 @@
 # vend
 
+## Unreleased
+
+#### Added
+
+- More entries to the registry.
+
+#### Fixed
+
+- An infinite recursion bug involving symlinks.
+
 ## 0.3.1 (2025-09-03)
 
 #### Added

@@ -407,6 +407,7 @@ map back to the parent, such that later only one git clone is performed.")
     :harmony         "https://codeberg.org/shirakumo/harmony.git"
     :history-tree    "https://github.com/atlas-engineer/history-tree.git"
     :hsx             "https://github.com/skyizwhite/hsx.git"
+    :html            "https://github.com/fosskers/html.git"
     :html-encode     "https://github.com/fosskers/html-encode.git"
     :html-entities   "https://github.com/BnMcGn/html-entities.git"
     :http-body       "https://github.com/fukamachi/http-body.git"
