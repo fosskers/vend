@@ -51,25 +51,43 @@ sources. See `sources.lisp' and `entry.lisp' for examples of how to do this.
 
 "))
 
-(defmethod transduce (xform f (source cl:string))
-  (string-transduce xform f source))
-
 (defmethod transduce (xform f (source list))
   "Transducing over an alist works automatically via this method, and the pairs are
 streamed as-is as cons cells."
   (list-transduce xform f source))
 
 (defmethod transduce (xform f (source cl:vector))
+  "Elements are indexed via `aref'."
   (vector-transduce xform f source))
 
 (defmethod transduce (xform f (source reversed))
+  "Operate over a vector in reversed order."
   (reversed-transduce xform f source))
+
+(defmethod transduce (xform f (source cl:bit-vector))
+  "Elements are indexed via `bit'."
+  (bit-vector-transduce xform f source))
+
+#+(or sbcl ccl abcl)
+(defmethod transduce (xform f (source cl:simple-bit-vector))
+  "Elements are indexed via `sbit'."
+  (simple-bit-vector-transduce xform f source))
+
+(defmethod transduce (xform f (source cl:string))
+  "Elements are indexed via `char'."
+  (string-transduce xform f source))
+
+#+(or sbcl ccl abcl)
+(defmethod transduce (xform f (source cl:simple-string))
+  "Elements are indexed via `schar'."
+  (simple-string-transduce xform f source))
 
 (defmethod transduce (xform f (source cl:hash-table))
   "Yields key-value pairs as cons cells."
   (hash-table-transduce xform f source))
 
 (defmethod transduce (xform f (source pathname))
+  "Opens the file and yields individual lines."
   (file-transduce xform f source))
 
 (defmethod transduce (xform f (source generator))
@@ -123,7 +141,7 @@ streamed as-is as cons cells."
   (labels ((recurse (acc items)
              (if (null items)
                  acc
-                 (let ((v (safe-call f acc (car items))))
+                 (let ((v (funcall f acc (car items))))
                    (if (reduced? v)
                        (reduced-val v)
                        (recurse v (cdr items)))))))
@@ -140,13 +158,15 @@ streamed as-is as cons cells."
          (result (vector-reduce xf init coll)))
     (funcall xf result)))
 
+(declaim (ftype (function (t t cl:vector) *) vector-reduce))
 (defun vector-reduce (f identity vec)
   (declare (optimize (speed 3) (safety 1) (debug 1)))
   (let ((len (length vec)))
     (labels ((recurse (acc i)
+               (declare (type fixnum i))
                (if (= i len)
                    acc
-                   (let ((acc (safe-call f acc (aref vec i))))
+                   (let ((acc (funcall f acc (aref vec i))))
                      (if (reduced? acc)
                          (reduced-val acc)
                          (recurse acc (1+ i)))))))
@@ -154,6 +174,54 @@ streamed as-is as cons cells."
 
 #+nil
 (vector-transduce (map #'1+) #'cons #(1 2 3 4 5))
+
+(declaim (ftype (function (t t cl:bit-vector) *) bit-vector-transduce))
+(defun bit-vector-transduce (xform f coll)
+  (let* ((init   (funcall f))
+         (xf     (funcall xform f))
+         (result (bit-vector-reduce xf init coll)))
+    (funcall xf result)))
+
+(declaim (ftype (function (t t cl:bit-vector) *) bit-vector-reduce))
+(defun bit-vector-reduce (f identity vec)
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
+  (let ((len (length vec)))
+    (labels ((recurse (acc i)
+               (declare (type fixnum i))
+               (if (= i len)
+                   acc
+                   (let ((acc (funcall f acc (bit vec i))))
+                     (if (reduced? acc)
+                         (reduced-val acc)
+                         (recurse acc (1+ i)))))))
+      (recurse identity 0))))
+
+#+nil
+(bit-vector-transduce (map #'1+) #'cons #*0101)
+
+(declaim (ftype (function (t t cl:simple-bit-vector) *) simple-bit-vector-transduce))
+(defun simple-bit-vector-transduce (xform f coll)
+  (let* ((init   (funcall f))
+         (xf     (funcall xform f))
+         (result (simple-bit-vector-reduce xf init coll)))
+    (funcall xf result)))
+
+(declaim (ftype (function (t t cl:simple-bit-vector) *) simple-bit-vector-reduce))
+(defun simple-bit-vector-reduce (f identity vec)
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
+  (let ((len (length vec)))
+    (labels ((recurse (acc i)
+               (declare (type fixnum i))
+               (if (= i len)
+                   acc
+                   (let ((acc (funcall f acc (sbit vec i))))
+                     (if (reduced? acc)
+                         (reduced-val acc)
+                         (recurse acc (1+ i)))))))
+      (recurse identity 0))))
+
+#+nil
+(simple-bit-vector-transduce (map #'1+) #'cons #*0101)
 
 (defun reversed-transduce (xform f coll)
   (let* ((init   (funcall f))
@@ -166,9 +234,10 @@ streamed as-is as cons cells."
   (let* ((vec (reversed-vector rev))
          (len (length vec)))
     (labels ((recurse (acc i)
+               (declare (type fixnum i))
                (if (< i 0)
                    acc
-                   (let ((acc (safe-call f acc (aref vec i))))
+                   (let ((acc (funcall f acc (aref vec i))))
                      (if (reduced? acc)
                          (reduced-val acc)
                          (recurse acc (1- i)))))))
@@ -179,10 +248,51 @@ streamed as-is as cons cells."
 
 (declaim (ftype (function (t t cl:string) *) string-transduce))
 (defun string-transduce (xform f coll)
-  (vector-transduce xform f coll))
+  (let* ((init   (funcall f))
+         (xf     (funcall xform f))
+         (result (string-reduce xf init coll)))
+    (funcall xf result)))
 
 #+nil
-(string-transduce (map #'char-upcase) #'cons "hello")
+(string-transduce (map #'char-upcase) #'string "hello")
+
+(declaim (ftype (function (t t cl:string) *) string-reduce))
+(defun string-reduce (f identity str)
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
+  (let ((len (length str)))
+    (labels ((recurse (acc i)
+               (declare (type fixnum i))
+               (if (= i len)
+                   acc
+                   (let ((acc (funcall f acc (char str i))))
+                     (if (reduced? acc)
+                         (reduced-val acc)
+                         (recurse acc (1+ i)))))))
+      (recurse identity 0))))
+
+(declaim (ftype (function (t t cl:simple-string) *) simple-string-transduce))
+(defun simple-string-transduce (xform f coll)
+  (let* ((init   (funcall f))
+         (xf     (funcall xform f))
+         (result (simple-string-reduce xf init coll)))
+    (funcall xf result)))
+
+#+nil
+(simple-string-transduce (map #'char-upcase) #'string "hello")
+
+(declaim (ftype (function (t t cl:simple-string) *) simple-string-reduce))
+(defun simple-string-reduce (f identity str)
+  (declare (optimize (speed 3) (safety 1) (debug 1)))
+  (let ((len (length str)))
+    (labels ((recurse (acc i)
+               (declare (type fixnum i))
+               (if (= i len)
+                   acc
+                   (let ((acc (funcall f acc (schar str i))))
+                     (if (reduced? acc)
+                         (reduced-val acc)
+                         (recurse acc (1+ i)))))))
+      (recurse identity 0))))
 
 (declaim (ftype (function (t t cl:hash-table) *) hash-table-transduce))
 (defun hash-table-transduce (xform f coll)
@@ -199,7 +309,7 @@ streamed as-is as cons cells."
                (multiple-value-bind (entry-p key value) (iter)
                  (if (not entry-p)
                      acc
-                     (let ((acc (safe-call f acc (cl:cons key value))))
+                     (let ((acc (funcall f acc (cl:cons key value))))
                        (if (reduced? acc)
                            (reduced-val acc)
                            (recurse acc)))))))
@@ -240,7 +350,7 @@ responsiblity of the caller!"
              (let ((line (read-line stream nil)))
                (if (not line)
                    acc
-                   (let ((acc (safe-call f acc line)))
+                   (let ((acc (funcall f acc line)))
                      (if (reduced? acc)
                          (reduced-val acc)
                          (recurse acc)))))))
@@ -262,7 +372,7 @@ responsiblity of the caller!"
   (labels ((recurse (acc)
              (let ((val (funcall (generator-func gen))))
                (cond ((eq *done* val) acc)
-                     (t (let ((acc (safe-call f acc val)))
+                     (t (let ((acc (funcall f acc val)))
                           (if (reduced? acc)
                               (reduced-val acc)
                               (recurse acc))))))))
@@ -287,7 +397,7 @@ responsiblity of the caller!"
                           :report "Supply a value for the final key."
                           :interactive (lambda () (prompt-new-value (format nil "Value for key ~a: " key)))
                           (recurse acc (list key value))))))
-                   (t (let ((v (safe-call f acc (cl:cons (car items) (second items)))))
+                   (t (let ((v (funcall f acc (cl:cons (car items) (second items)))))
                         (if (reduced? v)
                             (reduced-val v)
                             (recurse v (cdr (cdr items)))))))))

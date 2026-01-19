@@ -72,10 +72,9 @@ keep results that are non-nil.
   (lambda (reducer)
     (let ((drop? t))
       (lambda (result &optional (input nil i?))
-        (if i? (if (and drop? (funcall pred input))
-                   result
-                   (progn (setf drop? nil)
-                          (funcall reducer result input)))
+        (if i? (cond ((and drop? (funcall pred input)) result)
+                     (t (setf drop? nil)
+                        (funcall reducer result input)))
             (funcall reducer result))))))
 
 #+nil
@@ -138,10 +137,10 @@ transduction as soon as any element fails the test."
   "Transducer: Concatenate all the sublists and subvectors in the transduction."
   (let ((preserving-reducer (preserving-reduced reducer)))
     (lambda (result &optional (input nil i?))
-      (if i? (etypecase input
+      (if i? (typecase input
                (cl:list   (list-reduce preserving-reducer result input))
                (cl:vector (vector-reduce preserving-reducer result input))
-               (t (error 'unusable-type :type (type-of input))))
+               (otherwise (error 'unusable-type :type (type-of input))))
           (funcall reducer result)))))
 
 #+nil
@@ -159,10 +158,10 @@ transduction as soon as any element fails the test."
   "Transducer: Entirely flatten all lists and vectors in the transduction,
 regardless of nesting."
   (lambda (result &optional (input nil i?))
-    (if i? (etypecase input
+    (if i? (typecase input
              (cl:list (list-reduce (preserving-reduced (flatten reducer)) result input))
              (cl:vector (vector-reduce (preserving-reduced (flatten reducer)) result input))
-             (t (funcall reducer result input)))
+             (otherwise (funcall reducer result input)))
         (funcall reducer result))))
 
 #+nil
@@ -223,14 +222,14 @@ transduction.
           (collect '()))
       (lambda (result &optional (input nil i?))
         (if i? (let ((fout (funcall f input)))
-                 (if (or (equal fout prev) (eq prev 'nothing))
-                     (progn (setf prev fout)
-                            (setf collect (cl:cons input collect))
-                            result)
-                     (let ((next-input (reverse collect)))
-                       (setf prev fout)
-                       (setf collect (list input))
-                       (funcall reducer result next-input))))
+                 (cond ((or (equal fout prev) (eq prev 'nothing))
+                        (setf prev fout)
+                        (setf collect (cl:cons input collect))
+                        result)
+                       (t (let ((next-input (reverse collect)))
+                            (setf prev fout)
+                            (setf collect (list input))
+                            (funcall reducer result next-input)))))
             (let ((result (if (null collect)
                               result
                               (funcall reducer result (reverse collect)))))
@@ -247,13 +246,12 @@ transduction.
   (lambda (reducer)
     (let ((send-elem? nil))
       (lambda (result &optional (input nil i?))
-        (if i? (if send-elem?
-                   (let ((result (funcall reducer result elem)))
-                     (if (reduced? result)
-                         result
-                         (funcall reducer result input)))
-                   (progn (setf send-elem? t)
-                          (funcall reducer result input)))
+        (if i? (cond (send-elem? (let ((result (funcall reducer result elem)))
+                                   (if (reduced? result)
+                                       result
+                                       (funcall reducer result input))))
+                     (t (setf send-elem? t)
+                        (funcall reducer result input)))
             (funcall reducer result))))))
 
 #+nil
@@ -341,10 +339,9 @@ not careful."
     (let ((seen (make-hash-table :test #'equal)))
       (lambda (result &optional (input nil i?))
         (if i? (let ((mapped (funcall f input)))
-                 (if (gethash mapped seen)
-                     result
-                     (progn (setf (gethash mapped seen) t)
-                            (funcall reducer result input))))
+                 (cond ((gethash mapped seen) result)
+                       (t (setf (gethash mapped seen) t)
+                          (funcall reducer result input))))
             (funcall reducer result))))))
 
 #++
@@ -356,10 +353,9 @@ not careful."
   "Transducer: Remove adjacent duplicates from the transduction."
   (let ((prev 'nothing))
     (lambda (result &optional (input nil i?))
-      (if i? (if (equal prev input)
-                 result
-                 (progn (setf prev input)
-                        (funcall reducer result input)))
+      (if i? (cond ((equal prev input) result)
+                   (t (setf prev input)
+                      (funcall reducer result input)))
           (funcall reducer result)))))
 
 #+nil
@@ -388,11 +384,11 @@ of the transduction is always included.
       (lambda (reducer)
         (let ((curr 1))
           (lambda (result &optional (input nil i?))
-            (if i? (if (= 1 curr)
-                       (progn (setf curr n)
-                              (funcall reducer result input))
-                       (progn (setf curr (1- curr))
-                              result))
+            (if i? (cond ((= 1 curr)
+                          (setf curr n)
+                          (funcall reducer result input))
+                         (t (setf curr (1- curr))
+                            result))
                 (funcall reducer result)))))))
 
 #+nil
@@ -430,10 +426,9 @@ applications of a given function F.
       (lambda (result &optional (input nil i?))
         (cond ((and i? unused?)
                (let ((res (funcall reducer result item)))
-                 (if (reduced? res)
-                     res
-                     (progn (setf unused? nil)
-                            (funcall reducer res input)))))
+                 (cond ((reduced? res) res)
+                       (t (setf unused? nil)
+                          (funcall reducer res input)))))
               (i? (funcall reducer result input))
               ;; A weird case where they specified `once', but the original
               ;; Source itself was empty.
@@ -460,7 +455,7 @@ applications of a given function F.
 The stream can consist of either individual characters or whole strings. The
 former would occur when transducing over a string directly. The latter would
 occur when transducing over a stream/file line-by-line."
-  (let ((acc (short-string))
+  (let ((acc (make-string-output-stream :element-type 'character))
         (parens 0))
     (lambda (result &optional (input nil i?))
       (declare (type fixnum parens))
@@ -468,20 +463,20 @@ occur when transducing over a stream/file line-by-line."
                  (case c
                    (#\(
                     (incf parens)
-                    (vector-push-extend c acc)
+                    (write-char c acc)
                     res)
                    (#\)
                     (decf parens)
-                    (vector-push-extend c acc)
+                    (write-char c acc)
                     (cond ((zerop parens)
-                           (let ((curr acc))
-                             (setf acc (short-string))
+                           (let ((curr (get-output-stream-string acc)))
+                             (setf acc (make-string-output-stream :element-type 'character))
                              (funcall reducer res curr)))
                           ((< parens 0) (error 'unmatched-closing-paren))
                           (t res)))
-                   (t (cond ((zerop parens) res)
-                            (t (vector-push-extend c acc)
-                               res)))))
+                   (otherwise (cond ((zerop parens) res)
+                                    (t (write-char c acc)
+                                       res)))))
                (a-string (res i)
                  (declare (type fixnum i))
                  (cond ((= i (length input)) res)
@@ -519,9 +514,9 @@ need for the caller to manually pass a REDUCER."
   (let ((headers nil))
     (lambda (result &optional (input nil i?))
       (if i? (let ((items (split-csv-line input)))
-               (if headers (funcall reducer result (zipmap headers items))
-                   (progn (setf headers items)
-                          result)))
+               (cond (headers (funcall reducer result (zipmap headers items)))
+                     (t (setf headers items)
+                        result)))
           (funcall reducer result)))))
 
 #+nil
@@ -530,12 +525,31 @@ need for the caller to manually pass a REDUCER."
                  (map (lambda (hm) (gethash "Name" hm))))
            #'cons '("Alice,35" "Bob,26"))
 
+#+nil
+(transduce #'from-csv #'first '("Name,Money,Age" "Colin,\"10,000\",37"))
+
 (defun split-csv-line (line)
   "Split a LINE of CSV data in a sane way.
 
 This removes any extra whitespace that might be hanging around between elements."
-  (mapcar (lambda (s) (string-trim " " s))
-          (string-split line :separator #\,)))
+  (let ((mode :comma))
+    (transduce (comp (group-by (lambda (c)
+                                 (cond ((and (eq mode :comma) (char= c #\,))
+                                        nil)
+                                       ((and (eq mode :quote) (char= c #\"))
+                                        (setf mode :comma)
+                                        t)
+                                       ((and (eq mode :comma) (char= c #\"))
+                                        (setf mode :quote)
+                                        t)
+                                       (t t))))
+                     (map (lambda (chars) (cl:concatenate 'cl:string chars)))
+                     (map (lambda (s) (string-trim " \"" s)))
+                     (filter (lambda (s) (not (string= s ",")))))
+               #'cons line)))
+
+#+nil
+(split-csv-line "Colin,   \"10,000\"   ,37")
 
 (defun into-csv (headers)
   "Transducer: Given a sequence of HEADERS, rerender each item in the data stream
@@ -559,10 +573,9 @@ table whose keys are strings that match the values found in HEADERS.
           (lambda (result &optional (input nil i?))
             (if i? (if unsent
                        (let ((res (funcall reducer result (recsv headers))))
-                         (if (reduced? res)
-                             res
-                             (progn (setf unsent nil)
-                                    (funcall reducer res (table-vals->csv headers input)))))
+                         (cond ((reduced? res) res)
+                               (t (setf unsent nil)
+                                  (funcall reducer res (table-vals->csv headers input)))))
                        (funcall reducer result (table-vals->csv headers input)))
                 (funcall reducer result)))))))
 
@@ -584,8 +597,39 @@ of its values."
   "Reconvert some ITEMS into a comma-separated string."
   (format nil "~{~a~^,~}" items))
 
-
 ;; --- Higher Order Transducers --- ;;
+
+(defun safe (tr)
+  "Transducer: Given a transducer that may error, wrap it in `restart-case'
+to provide various ways of skipping or handling that error."
+  (lambda (reducer)
+    (let ((callable (funcall tr reducer)))
+      (lambda (result &optional (input nil i?))
+        (if (not i?)
+            (funcall callable result)
+            (labels ((recurse (item)
+                       (restart-case (funcall callable result item)
+                         (next-item ()
+                           :report "Skip this item and continue the transduction."
+                           result)
+                         (retry-item ()
+                           :report "Put this item through the transduction chain once more."
+                           (recurse item))
+                         (alter-item (alter)
+                           :report "Transform this item via a given function, then try the transduction again."
+                           :interactive (lambda () (prompt-for-function-name))
+                           (recurse (funcall alter item)))
+                         (use-value (value)
+                           :report "Supply a different value and reattempt the transduction."
+                           :interactive (lambda () (prompt-new-value "Value: "))
+                           (recurse value)))))
+              (recurse input)))))))
+
+#+nil
+(transduce (comp (drop 1)
+                 (safe (map (lambda (item) (if (= item 1) (error "無念") item))))
+                 (take 1))
+           #'cons '(0 1 2 3))
 
 (defun branch (pred ta tb)
   "Transducer: If a PRED yields non-NIL on a value, proceed with transducer chain

@@ -17,22 +17,45 @@ reversal."
         (t '())))
 
 (defun string (&optional (acc nil a?) (input #\z i?))
-  "Reducer: Collect a stream of characters into to a single string."
-  (cond ((and a? i?) (cl:cons input acc))
-        ((and a? (not i?)) (cl:concatenate 'cl:string (nreverse acc)))
-        (t '())))
+  "Reducer: Collect a stream of characters into to a `simple-string'."
+  (cond ((and a? i?)
+         (write-char input acc)
+         acc)
+        ((and a? (not i?)) (get-output-stream-string acc))
+        (t (make-string-output-stream :element-type 'character))))
 
 #+nil
-(string-transduce (map #'char-upcase) #'string "hello")
+(transduce (map #'char-upcase) #'string "hello")
 
+(defun base-string (&optional (acc nil a?) (input #\z i?))
+  "Reducer: Collect a stream of characters into to a single string of `base-char'."
+  (cond ((and a? i?)
+         (write-char input acc)
+         acc)
+        ((and a? (not i?)) (get-output-stream-string acc))
+        (t (make-string-output-stream :element-type 'base-char))))
+
+#+nil
+(transduce (map #'char-upcase) #'base-string "hello")
+
+(declaim (ftype (function (&optional (or cl:vector null) t) cl:vector) vector))
 (defun vector (&optional (acc nil a?) (input nil i?))
   "Reducer: Collect a stream of values into a vector."
-  (cond ((and a? i?) (cl:cons input acc))
-        ((and a? (not i?)) (cl:concatenate 'cl:vector (nreverse acc)))
-        (t '())))
+  (cond ((and a? i?) (vector-push-extend input acc) acc)
+        ((and a? (not i?)) acc)
+        (t (make-array 16 :adjustable t :fill-pointer 0))))
 
 #+nil
 (vector-transduce (map #'1+) #'vector #(1 2 3))
+
+(defun bit-vector (&optional (acc nil a?) (input 0 i?))
+  "Reducer: Collect a stream of `bit' values into a `bit-vector'."
+  (cond ((and a? i?) (vector-push-extend input acc) acc)
+        ((and a? (not i?)) acc)
+        (t (make-array 16 :element-type 'bit :adjustable t :fill-pointer 0))))
+
+#+nil
+(transduce (take 20) #'bit-vector (cycle #(0 1)))
 
 (declaim (ftype (function (&optional (or cl:hash-table null) t) cl:hash-table) hash-table))
 (defun hash-table (&optional (acc nil a?) (input nil i?))
@@ -58,8 +81,9 @@ reversal."
 (transduce #'pass #'count '(1 2 3 4 5))
 
 (defun median (&optional (acc nil a?) (input nil i?))
-  "Reducer: Calculate the median value of all numeric elements in a transduction.
-The elements are sorted once before the median is extracted.
+  "Reducer: Calculate the median value of all orderable elements (numbers,
+characters, strings) in a transduction. The elements are sorted once before the
+median is extracted.
 
 # Conditions
 
@@ -72,10 +96,10 @@ The elements are sorted once before the median is extracted.
              ;;
              ;; It would be nice if there were a generic way to compare, or if
              ;; the user could pass in a function for this.
-             (let* ((cmp    (etypecase (car acc)
+             (let* ((cmp    (typecase (car acc)
                               (cl:string #'string<)
                               (cl:character #'char<)
-                              (t #'<)))
+                              (otherwise #'<)))
                     (len    (length acc))
                     (ix     (floor (/ len 2)))
                     (sorted (sort acc cmp)))
@@ -85,6 +109,13 @@ The elements are sorted once before the median is extracted.
 #+nil
 (transduce #'pass #'median '(0 1 2 3 4))
 
+(defstruct avg
+  "A helper struct for the `average' reducer."
+  ;; The number of items seen thusfar.
+  (count 0 :type fixnum)
+  ;; Some running total of summed values, etc.
+  (total 0 :type real))
+
 (defun average (&optional (acc nil a?) (input nil i?))
   "Reducer: Calculate the average value of all numeric elements in a transduction.
 
@@ -92,19 +123,66 @@ The elements are sorted once before the median is extracted.
 
 - `empty-transduction': when no values made it through the transduction."
   (cond ((and a? i?)
-         (destructuring-bind (count . total) acc
-           (cl:cons (1+ count) (+ total input))))
+         (incf (avg-count acc))
+         (incf (avg-total acc) input)
+         acc)
         ((and a? (not i?))
-         (destructuring-bind (count . total) acc
-           (if (= 0 count)
-               (error 'empty-transduction :msg "`average' called on an empty transduction.")
-               (/ total count))))
-        (t (cl:cons 0 0))))
+         (if (zerop (avg-count acc))
+             (error 'empty-transduction :msg "`average' called on an empty transduction.")
+             (/ (avg-total acc) (avg-count acc))))
+        (t (make-avg :count 0 :total 0))))
 
 #+nil
 (transduce #'pass #'average '(1 2 3 4 5 6))
 #+nil
 (transduce (filter #'evenp) #'average '(1 3 5))
+
+(defun variance (mean)
+  "Reducer: Calculate the variance of a stream of values, given their mean.
+
+# Conditions
+
+- `empty-transduction': when no values made it through the transduction."
+  (lambda (&optional (acc nil a?) (input nil i?))
+    (cond ((and a? i?)
+           (incf (avg-count acc))
+           (incf (avg-total acc)
+                 (expt (- input mean) 2))
+           acc)
+          ((and a? (not i?))
+           (if (zerop (avg-count acc))
+               (error 'empty-transduction :msg "`variance' called on an empty transduction.")
+               (/ (avg-total acc) (avg-count acc))))
+          (t (make-avg :count 0 :total 0)))))
+
+#+nil
+(let* ((nums '(1 2 3 4 5 6 7 8 9 10))
+       (mean (transduce #'pass #'average nums)))
+  (sqrt (transduce #'pass (variance mean) nums)))
+
+(defun ratio (pred)
+  "Reducer: The percentage of items that satisfied a predicate. The final value
+will always be between 0 and 1.
+
+# Conditions
+
+- `empty-transduction': when no values made it through the transduction."
+  (lambda (&optional (acc nil a?) (input nil i?))
+    (cond ((and a? i?)
+           (incf (avg-count acc))
+           (when (funcall pred input)
+             (incf (avg-total acc)))
+           acc)
+          ((and a? (not i?))
+           (if (zerop (avg-count acc))
+               (error 'empty-transduction :msg "`ratio' called on an empty transduction.")
+               (/ (avg-total acc) (avg-count acc))))
+          (t (make-avg :count 0 :total 0)))))
+
+#+nil
+(transduce #'pass (ratio #'evenp) #(1 2 3 4 5 6))
+#+nil
+(transduce #'pass (ratio #'evenp) #())
 
 (declaim (ftype (function ((function (t) *)) *) any?))
 (defun any? (pred)
