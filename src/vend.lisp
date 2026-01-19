@@ -236,7 +236,7 @@ Flags:
 
 (defparameter +vend-rules+
   '((("--help" "-h") 0 (vend/help))
-    ("--version" 0 (format t "0.3.1~%"))
+    ("--version" 0 (format t "0.3.2~%"))
     ("check"  1 (vend/check :focus (cadr 1)) :stop)
     ("eval"   1 (vend/eval (cdr 1)) :stop)
     ("get"    0 (vend/get))
