@@ -55,6 +55,7 @@ functions for communicating with the filesystem to test if files exist, etc.
 | SBCL     | Yes     | Yes         | Yes           |
 | ECL      | [[https://gitlab.com/embeddable-common-lisp/ecl/-/issues/751][No]]      | Yes         | Yes           |
 | ABCL     | Yes     | [[https://github.com/armedbear/abcl/issues/672][No]]          | Yes           |
+| CMUCL    | Yes     | Yes         | Yes           |
 | CCL      | Yes     | [[https://github.com/Clozure/ccl/issues/477][No]]          | Yes           |
 | Clasp    | [[https://github.com/clasp-developers/clasp/issues/1594][No]]      | Yes         | Yes (2.7)     |
 | Allegro  | Yes     | No          | Yes           |
@@ -80,7 +81,7 @@ Note that nearly every function here can be passed either a =pathname= or a
 
 *** root?, empty?
 
-Is the given PATH the root directory?
+=root?=: Is the given PATH the root directory?
 
 #+begin_src lisp :exports both
 (filepaths:root? #p"/")
@@ -89,7 +90,7 @@ Is the given PATH the root directory?
 #+RESULTS:
 : T
 
-Is the given PATH an empty string?
+=empty?=: Is the given PATH an empty string?
 
 #+begin_src lisp :exports both
 (filepaths:empty? #p"")
@@ -100,7 +101,7 @@ Is the given PATH an empty string?
 
 *** absolute?, relative?
 
-Yields T when the given PATH is a full, absolute path.
+=absolute?=: Yields T when the given PATH is a full, absolute path.
 
 #+begin_src lisp :exports both
 (filepaths:absolute? "/home/colin/foo.txt")
@@ -109,7 +110,7 @@ Yields T when the given PATH is a full, absolute path.
 #+RESULTS:
 : T
 
-Yields T when the given PATH is a relative one.
+=relative?=: Yields T when the given PATH is a relative one.
 
 #+begin_src lisp :exports both
 (filepaths:relative? #p"bar/foo.txt")
@@ -120,7 +121,7 @@ Yields T when the given PATH is a relative one.
 
 *** starts-with?, ends-with?
 
-Are the initial components of a PATH some BASE?
+=starts-with?=: Are the initial components of a PATH some BASE?
 
 #+begin_src lisp :exports both
 (filepaths:starts-with? #p"/foo/bar/baz/zing.json" "/foo/bar")
@@ -129,7 +130,7 @@ Are the initial components of a PATH some BASE?
 #+RESULTS:
 : T
 
-Are the final components of a PATH some given CHILD?
+=ends-with?=: Are the final components of a PATH some given CHILD?
 
 #+begin_src lisp :exports both
 (filepaths:ends-with? #p"/foo/bar/baz/zing.json" "baz/zing.json")
@@ -140,8 +141,8 @@ Are the final components of a PATH some given CHILD?
 
 *** directory?
 
-Yields T if the PATH represents a directory. It only tests for structure; the
-filesystem isn't probed.
+=directory?=: Yields T if the PATH represents a directory. It only tests for
+structure; the filesystem isn't probed.
 
 #+begin_src lisp :exports both
 (filepaths:directory? #p"/foo/bar/")
@@ -161,7 +162,7 @@ filesystem isn't probed.
 
 *** join
 
-Combine two or more components together.
+=join=: Combine one or more components together.
 
 #+begin_src lisp :exports both
 (filepaths:join "/foo" "bar" "baz" "test.json")
@@ -169,6 +170,8 @@ Combine two or more components together.
 
 #+RESULTS:
 : #P"/foo/bar/baz/test.json"
+
+The arguments can already be partial paths.
 
 #+begin_src lisp :exports both
 (filepaths:join #p"/bar/baz/" #p"foo.json")
@@ -181,7 +184,7 @@ Combine two or more components together.
 
 *** base, with-base
 
- The non-extension, non-directory portion of the filename of a PATH.
+ =base=: The non-extension, non-directory portion of the filename of a PATH.
 
 #+begin_src lisp :exports both
 (filepaths:base #p"/foo/bar/baz.txt")
@@ -190,7 +193,7 @@ Combine two or more components together.
 #+RESULTS:
 : baz
 
-Swap the base portion of a PATH with a NEW one. Yields a new path object.
+=with-base=: Swap the base portion of a PATH with a NEW one. Yields a new path object.
 
 #+begin_src lisp :exports both
 (filepaths:with-base #p"/foo/bar/baz.txt" "jack")
@@ -201,7 +204,7 @@ Swap the base portion of a PATH with a NEW one. Yields a new path object.
 
 *** name, with-name
 
-The filename of a PATH with no other directory components.
+=name=: The filename of a PATH with no other directory components.
 
 #+begin_src lisp :exports both
 (filepaths:name #p"/foo/bar/baz.txt")
@@ -210,7 +213,7 @@ The filename of a PATH with no other directory components.
 #+RESULTS:
 : baz.txt
 
-Swap the filename portion of a PATH with a NEW one. Yields a new path object.
+=with-name=: Swap the filename portion of a PATH with a NEW one. Yields a new path object.
 
 #+begin_src lisp :exports both
 (filepaths:with-name #p"/foo/bar/baz.txt" "jack.json")
@@ -221,7 +224,7 @@ Swap the filename portion of a PATH with a NEW one. Yields a new path object.
 
 *** parent, with-parent
 
-Yield PATH without its final component, if there is one.
+=parent=: Yield PATH without its final component, if there is one.
 
 #+begin_src lisp :exports both
 (filepaths:parent #p"/foo/bar/baz.txt")
@@ -230,7 +233,7 @@ Yield PATH without its final component, if there is one.
 #+RESULTS:
 : #P"/foo/bar/"
 
-Swap the parent portion of a PATH.
+=with-parent=: Swap the parent portion of a PATH.
 
 #+begin_src lisp :exports both
 (filepaths:with-parent #p"/foo/bar/baz.json" #p"/zing")
@@ -241,7 +244,7 @@ Swap the parent portion of a PATH.
 
 *** extension, with-extension, add-extension, drop-extension
 
-The extension of a given PATH.
+=extension=: The extension of a given PATH.
 
 #+begin_src lisp :exports both
 (filepaths:extension #p"/foo/bar.json")
@@ -250,7 +253,7 @@ The extension of a given PATH.
 #+RESULTS:
 : json
 
-Swap the entire extension of a given PATH. Yields a new path object.
+=with-extension=: Swap the entire extension of a given PATH. Yields a new path object.
 
 #+begin_src lisp :exports both
 (filepaths:with-extension #p"/foo/bar/baz.txt" "json")
@@ -260,7 +263,7 @@ Swap the entire extension of a given PATH. Yields a new path object.
 : #P"/foo/bar/baz.json"
 
 
-Add an extension to the given path, even if it already has one.
+=add-extension=: Add an extension to the given path, even if it already has one.
 
 #+begin_src lisp :exports both
 (filepaths:add-extension #p"/foo/bar/baz.txt" "zip")
@@ -269,7 +272,7 @@ Add an extension to the given path, even if it already has one.
 #+RESULTS:
 : #P"/foo/bar/baz.txt.zip"
 
-Remove an extension from a PATH.
+=drop-extension=: Remove an extension from a PATH.
 
 #+begin_src lisp :exports both
 (filepaths:drop-extension #p"/foo/bar/baz.json")
@@ -289,7 +292,7 @@ Remove an extension from a PATH.
 
 *** components, from-list
 
-Every component of a PATH broken up as a list.
+=components=: Every component of a PATH broken up as a list.
 
 #+begin_src lisp :results verbatim :exports both
 (filepaths:components #p"/foo/bar/baz.json")
@@ -298,7 +301,7 @@ Every component of a PATH broken up as a list.
 #+RESULTS:
 : ("/" "foo" "bar" "baz.json")
 
-Given a LIST of path components, construct a proper pathname object.
+=from-list=: Given a LIST of path components, construct a proper pathname object.
 
 #+begin_src lisp :exports both
 (filepaths:from-list '("foo" "bar" "baz"))
@@ -316,7 +319,7 @@ Given a LIST of path components, construct a proper pathname object.
 
 *** ensure-directory, ensure-string, ensure-path
 
-If a given PATH doesn't end in a path separator, add one.
+=ensure-directory=: If a given PATH doesn't end in a path separator, add one.
 
 #+begin_src lisp :exports both
 (filepaths:ensure-directory #p"/foo/bar/baz")
@@ -325,7 +328,7 @@ If a given PATH doesn't end in a path separator, add one.
 #+RESULTS:
 : #P"/foo/bar/baz/"
 
-A PATH is definitely a string after this.
+=ensure-string=: A PATH is definitely a string after this.
 
 #+begin_src lisp :results verbatim :exports both
 (type-of (filepaths:ensure-string #p"/foo/bar"))
@@ -334,7 +337,7 @@ A PATH is definitely a string after this.
 #+RESULTS:
 : (SIMPLE-BASE-STRING 8)
 
-A PATH is definitely a pathname after this.
+=ensure-path=: A PATH is definitely a pathname after this.
 
 #+begin_src lisp :exports both
 (type-of (filepaths:ensure-path "/foo/bar"))
@@ -345,7 +348,7 @@ A PATH is definitely a pathname after this.
 
 *** to-string, from-string
 
-Convert a PATH object into string.
+=to-string=: Convert a PATH object into string.
 
 #+begin_src lisp :exports both
 (filepaths:to-string #p"/foo/bar/baz.txt")
@@ -354,7 +357,7 @@ Convert a PATH object into string.
 #+RESULTS:
 : /foo/bar/baz.txt
 
-Convert a string into a proper filepath object.
+=from-string=: Convert a string into a proper filepath object.
 
 #+begin_src lisp :exports both
 (filepaths:from-string "/foo/bar/baz.txt")

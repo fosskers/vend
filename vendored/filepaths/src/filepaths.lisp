@@ -122,9 +122,9 @@ filesystem."
       (equal +separator+ (char path (1- (length path))))))
 
 #+nil
-(directoryp "/foo/bar/")
+(directory? "/foo/bar/")
 #+nil
-(directoryp "/foo/bar/baz.txt")
+(directory? "/foo/bar/baz.txt")
 
 (declaim (ftype (function ((or pathname string)) simple-string) base))
 (defun base (path)
@@ -276,35 +276,57 @@ filesystem."
 #+nil
 (add-extension #p"/foo/bar/baz.txt" "zip")
 
-(declaim (ftype (function ((or pathname string) (or pathname string) &rest (or pathname string)) pathname) join))
-(defun join (parent child &rest components)
-  "Combine two or more components together."
+(declaim (ftype (function ((or pathname string) &rest (or pathname string)) pathname) join))
+(defun join (parent &rest children)
+  "Combine one or more components together."
   (let* ((parent     (ensure-path parent))
-         (combined   (remove-if (lambda (s)
-                                  (or (string-equal +separator+ s)
-                                      (string-equal "" s)))
-                                (mapcan #'components (cons child components))))
+         (cleaned    (remove-if (lambda (s)
+                                  (or (string= +separator+ s)
+                                      (string= "" s)))
+                                (mapcan #'components children)))
+         (combined   (append (components parent) cleaned))
          (final      (car (last combined)))
          (rest       (butlast combined))
-         (abs-or-rel (if (absolutep parent) :absolute :relative))
-         (par-comps  (components parent))
-         (final-base (base final)))
+         (absolute?  (absolute? parent))
+         (abs-or-rel (if absolute? :absolute :relative))
+         (final-base (base final))
+         (dir?       (or (and (null cleaned) (directory? parent))
+                         (and cleaned (directory? (car (last children))))))
+         (version    (if dir? nil :newest)))
     (make-pathname :name (cond
+                           (dir? nil)
                            #+sbcl
-                           ((string-equal "**" final-base) (sbcl-wildcard))
+                           ((string= "**" final-base) (sbcl-wildcard))
+                           #+cmucl
+                           ((string= "**" final-base) (cmucl-wildcard))
                            #+(or abcl ccl allegro)
-                           ((string-equal "**" final-base) final-base)
+                           ((string= "**" final-base) final-base)
                            (t (keyword-if-special final-base)))
                    :type (extension final)
-                   :version :newest
+                   ;; NOTE: 2025-12-29 The `equal` behaviour for pathnames is
+                   ;; different between SBCL and ECL. The latter seems to take
+                   ;; `:version' into account, while the former does not.
+                   ;;
+                   ;; Directories should have a NIL `:version', as that field is
+                   ;; intended to refer to versions of the file itself on the
+                   ;; filesystem; a meaningless notion for a directory.
+                   :version version
                    :device (pathname-device parent)
                    :directory (cons abs-or-rel
                                     (mapcar #'keyword-if-special
-                                            (append (if (absolutep parent)
-                                                        (cdr par-comps)
-                                                        par-comps)
-                                                    rest))))))
+                                            (cond ((and dir? absolute?) (cdr combined))
+                                                  (absolute? (cdr rest))
+                                                  (dir? combined)
+                                                  (t rest)))))))
 
+#+nil
+(join "foo" "baz" "bar/")
+
+#+nil
+#p"**.json"
+
+#+nil
+(join "/foo" "**.json")
 #+nil
 (join "/" "foo" "bar" ".." "." ".." "baz" "stuff.json")
 #+nil
@@ -315,6 +337,7 @@ filesystem."
 
 #+nil
 (join "/foo" "bar" "**.json")
+
 #++
 (join "/foo/" "*.*")
 
@@ -326,15 +349,15 @@ filesystem."
 (declaim (ftype (function ((or pathname string)) list) components))
 (defun components (path)
   "Every component of a PATH broken up as a list."
-  (cond ((emptyp path) '())
+  (cond ((empty? path) '())
         ;; HACK 2024-06-17 Until ECL/Clasp support `**' in `:name' position.
         ;;
         ;; And not even a good hack, since it can be broken in cases where the
         ;; `**' comes at the end.
         #+(or ecl clasp)
-        ((and (stringp path) (string-equal "**" path)) '("**"))
+        ((and (stringp path) (string= "**" path)) '("**"))
         (t (let* ((path (ensure-path path))
-                  (comp (mapcar #'string-if-keyword (cdr (pathname-directory path))))
+                  (comp (mapcar #'string-if-keyword (directory-parts path)))
                   (list (if (directoryp path)
                             comp
                             (let* ((ext  (extension path))
@@ -351,8 +374,40 @@ filesystem."
 (components "/foo/bar/baz.json")
 #+nil
 (components "/foo/bar/.././../baz/stuff.json")
+#+nil
+(components "/foo/bar/./baz/stuff.json")
 #++
 (components "foo/*.*")
+#+nil
+(components ".")
+#+nil
+(components "/.")
+#+nil
+(components "foo/.")
+#+nil
+#p"foo/."
+
+#+nil
+(pathname-directory #p"foo/bar/baz")
+#+nil
+(pathname-directory #p"./")
+
+(defun directory-parts (path)
+  "Light post-processing around `pathname-directory' to ensure sanity."
+  (let ((parts (pathname-directory path)))
+    (if (and (eq :relative (car parts))
+             (null (cdr parts)))
+        '(".")
+        (cdr parts))))
+
+#+nil
+(directory-parts #p"/foo/bar/baz.txt")
+#+nil
+(directory-parts #p"/.")
+#+nil
+(directory-parts #p"foo/.")
+#+nil
+(directory-parts #p"foo/./")
 
 (declaim (ftype (function (list) pathname) from-list))
 (defun from-list (list)
@@ -366,6 +421,8 @@ filesystem."
 
 #+nil
 (from-list '("foo" "bar" "baz"))
+#+nil
+(from-list '("foo" "bar" "." "baz"))
 
 (declaim (ftype (function ((or pathname string)) pathname) ensure-directory))
 (defun ensure-directory (path)
@@ -411,10 +468,29 @@ filesystem."
   "A PATH is definitely a pathname after this."
   (if (pathnamep path) path (from-string path)))
 
+#+nil
+(ensure-path ".")
+#+nil
+(ensure-path "/.")
+#+nil
+(ensure-path "foo/bar/.")
+#+nil
+(ensure-path "/foo/./bar/foo.txt")
+
+;; NOTE: 2025-08-17 Unfortunately, CMUCL can't be stopped from stripping "."
+;; components from the directory field. Even if I manually add them back in a
+;; `make-pathname', it still strips them. This effect trickles up to
+;; `components', which suffers if a dot exists in the input.
 (declaim (ftype (function (string) pathname) from-string))
 (defun from-string (s)
   "Convert a string into a proper filepath object."
   (pathname s))
+
+#+nil
+(from-string ".")
+
+#+nil
+(from-string "foo/.")
 
 #+nil
 (join "/" "foo" "bar" ".." "." ".." "baz" "stuff.json")
@@ -462,6 +538,8 @@ a wildcard character."
   (cond
     #+sbcl
     ((sb-impl::pattern-p item) "**") ; FIXME 2024-06-16 Actually check the contents.
+    #+cmucl
+    ((lisp::pattern-p item) "**")
     (t (string-if-keyword item))))
 
 (declaim (ftype (function ((or string keyword)) string) string-if-keyword))
@@ -489,3 +567,8 @@ before being stored in the `:directory' portion of a pathname."
 (defun sbcl-wildcard ()
   "A SBCL-specific pattern type created when a ** appears in a path."
   (sb-impl::make-pattern '(:multi-char-wild :multi-char-wild)))
+
+#+cmucl
+(defun cmucl-wildcard ()
+  "A CMUCL-specific pattern type created when a ** appears in a path."
+  (lisp::make-pattern '(:multi-char-wild :multi-char-wild)))

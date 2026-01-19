@@ -1,6 +1,24 @@
 # filepaths
 
-## Unreleased
+## 1.1.0 (2026-01-06)
+
+#### Changed
+
+- `join`: Now only needs a single argument.
+
+## 1.0.4 (2025-12-29)
+
+Merry Christmas and Happy New Year!
+
+#### Fixed
+
+- `join`: Respect when the final path component indicates a directory.
+
+## 1.0.3 (2025-08-17)
+
+#### Added
+
+- CMUCL support.
 
 #### Fixed
 
