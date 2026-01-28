@@ -1,5 +1,11 @@
 # vend
 
+## Unreleased
+
+#### Added
+
+- Access to `mgl-pax` subsystems.
+
 ## 0.3.2 (2026-01-20)
 
 #### Added

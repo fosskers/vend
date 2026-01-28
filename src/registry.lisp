@@ -2,9 +2,13 @@
 
 (in-package :vend)
 
-;; TODO: 2024-01-11 Make this a HashTable.
+;; TODO: 2025-01-11 Make this a HashTable.
+;;
+;; 2026-01-29 Hasn't mattered yet.
 (defparameter +parents+
   '(:3bmd-ext-code-blocks :3bmd
+    :3bmd-ext-math :3bmd
+    :3bmd-ext-tables :3bmd
     :3b-bmfont/json :3b-bmfont
     :alloy-animation :alloy
     :alloy-simple :alloy
@@ -52,6 +56,7 @@
     :machine-state/opengl :machine-state
     :maxpc-apache :april
     :mcclim-layouts :mcclim
+    :mgl-pax.asdf :mgl-pax
     :mgl-pax-bootstrap :mgl-pax
     :nasdf :nyxt
     :north-core :north
@@ -799,6 +804,7 @@ map back to the parent, such that later only one git clone is performed.")
       (when (string-starts-with? (symbol-name sys) "LEM-") :lem)
       (when (string-starts-with? (symbol-name sys) "LEV-") :lev)
       (when (string-starts-with? (symbol-name sys) "MEMORY-REGIONS/") :memory-regions)
+      (when (string-starts-with? (symbol-name sys) "MGL-PAX/") :mgl-pax)
       (when (string-starts-with? (symbol-name sys) "MOCKINGBIRD/") :mockingbird)
       (when (string-starts-with? (symbol-name sys) "MOIRA/") :moira)
       (when (string-starts-with? (symbol-name sys) "MYSTIC-") :mystic)
