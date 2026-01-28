@@ -82,6 +82,7 @@
 #++
 (string-from-file #p"vend.asd")
 
+(fn systems-from-file (-> pathname list))
 (defun systems-from-file (path)
   "Extract all `defsystem' forms as proper sexp from a file."
   (t:transduce (t:map (lambda (sys)

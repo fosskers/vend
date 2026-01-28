@@ -11,6 +11,20 @@
 #-ecl
 (error "VEND can only be compiled with ECL.")
 
+;; --- Typing --- ;;
+
+(defmacro fn (name type)
+  "A shorthand for declaiming function types."
+  `(declaim (ftype ,type ,name)))
+
+(deftype -> (a b &rest args)
+  "A shorthand for function types."
+  (if (null args)
+      `(function (,a) ,b)
+      (let ((argz (butlast args))
+            (res (car (last args))))
+        `(function (,a ,b ,@argz) ,res))))
+
 ;; --- Strings --- ;;
 
 (declaim (ftype (function (string string &key (:from fixnum)) boolean) string-starts-with?))
