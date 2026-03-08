@@ -5,6 +5,7 @@
 #### Added
 
 - Access to `mgl-pax` subsystems.
+- `cl-migratum` and its dependencies to the registry.
 
 ## 0.3.2 (2026-01-20)
 

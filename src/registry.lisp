@@ -196,6 +196,7 @@ map back to the parent, such that later only one git clone is performed.")
     :circular-buffer "https://codeberg.org/wohonajax/circular-buffer.git"
     :circular-streams "https://github.com/fukamachi/circular-streams.git"
     :cl+ssl          "https://github.com/cl-plus-ssl/cl-plus-ssl.git"
+    :cl-ascii-table  "https://github.com/telephil/cl-ascii-table.git"
     :cl-autowrap     "https://github.com/rpav/cl-autowrap.git"
     :cl-annot        "https://github.com/m2ym/cl-annot.git"
     :cl-anonfun      "https://github.com/arielnetworks/cl-anonfun.git"
@@ -256,6 +257,7 @@ map back to the parent, such that later only one git clone is performed.")
     :cl-markless     "https://codeberg.org/shirakumo/cl-markless.git"
     :cl-markup       "https://github.com/arielnetworks/cl-markup.git"
     :cl-migemo       "https://github.com/snmsts/cl-migemo.git"
+    :cl-migratum     "https://github.com/dnaeon/cl-migratum.git"
     :cl-mime         "https://github.com/40ants/cl-mime.git"
     :cl-mixed        "https://codeberg.org/shirakumo/cl-mixed.git"
     :cl-modio        "https://codeberg.org/shinmera/cl-modio.git"
@@ -426,6 +428,7 @@ map back to the parent, such that later only one git clone is performed.")
     :hu.dwim.delico  "https://github.com/hu-dwim/hu.dwim.delico.git"
     :hu.dwim.logger  "https://github.com/hu-dwim/hu.dwim.logger.git"
     :hu.dwim.partial-eval "https://github.com/hu-dwim/hu.dwim.partial-eval.git"
+    :hu.dwim.rdbms   "https://github.com/hu-dwim/hu.dwim.rdbms.git"
     :hu.dwim.stefil  "https://github.com/hu-dwim/hu.dwim.stefil.git"
     :hu.dwim.syntax-sugar "https://github.com/hu-dwim/hu.dwim.syntax-sugar.git"
     :hu.dwim.util    "https://github.com/hu-dwim/hu.dwim.util.git"
@@ -479,6 +482,7 @@ map back to the parent, such that later only one git clone is performed.")
     :lru-cache       "https://codeberg.org/shinmera/lru-cache.git"
     :lsx             "https://github.com/fukamachi/lsx.git"
     :ltk             "https://github.com/ghollisjr/ltk.git"
+    :lw-compat       "https://github.com/pcostanza/lw-compat.git"
     :machine-state   "https://codeberg.org/shinmera/machine-state.git"
     :magic-ed        "https://github.com/sanel/magic-ed.git"
     :magicffi        "https://github.com/guicho271828/magicffi.git"
@@ -652,6 +656,7 @@ map back to the parent, such that later only one git clone is performed.")
     :termp           "https://github.com/vindarel/termp.git"
     :terrable        "https://codeberg.org/shirakumo/terrable.git"
     :text-draw       "https://codeberg.org/shinmera/text-draw.git"
+    :tmpdir          "https://github.com/moderninterpreters/tmpdir.git"
     :tooter          "https://codeberg.org/shinmera/tooter.git"
     :tiny-routes     "https://github.com/jeko2000/tiny-routes.git"
     :transducers     "https://github.com/fosskers/cl-transducers.git"
@@ -787,6 +792,7 @@ map back to the parent, such that later only one git clone is performed.")
       (when (string-starts-with? (symbol-name sys) "ALLOY-") :alloy)
       (when (string-starts-with? (symbol-name sys) "ASDF/") :asdf)
       (when (string-starts-with? (symbol-name sys) "CL-MARKLESS-") :cl-markless)
+      (when (string-starts-with? (symbol-name sys) "CL-MIGRATUM.") :cl-migratum)
       (when (string-starts-with? (symbol-name sys) "CL-MIXED-") :cl-mixed)
       (when (string-starts-with? (symbol-name sys) "CL-JSON-POINTER/") :cl-json-pointer)
       (when (string-starts-with? (symbol-name sys) "CL-SYNTAX-") :cl-syntax)
@@ -796,6 +802,11 @@ map back to the parent, such that later only one git clone is performed.")
       (when (string-starts-with? (symbol-name sys) "FRUGAL-UUID/") :frugal-uuid)
       (when (string-starts-with? (symbol-name sys) "GENERIC-CL.") :generic-cl)
       (when (string-starts-with? (symbol-name sys) "HSX/") :hsx)
+      (when (string-starts-with? (symbol-name sys) "HU.DWIM.RDBMS.") :hu.dwim.rdbms)
+      (when (string-starts-with? (symbol-name sys) "HU.DWIM.DEF+") :hu.dwim.def)
+      (when (string-starts-with? (symbol-name sys) "HU.DWIM.DEFCLASS-STAR+") :hu.dwim.defclass-star)
+      (when (string-starts-with? (symbol-name sys) "HU.DWIM.SYNTAX-SUGAR/") :hu.dwim.syntax-sugar)
+      (when (string-starts-with? (symbol-name sys) "HU.DWIM.UTIL/") :hu.dwim.util)
       (when (string-starts-with? (symbol-name sys) "LSX/") :lsx)
       (when (string-starts-with? (symbol-name sys) "IOLIB/") :iolib)
       (when (string-starts-with? (symbol-name sys) "IRONCLAD/") :ironclad)
