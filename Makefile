@@ -1,7 +1,7 @@
 .PHONY: install clean
 
 vend: build.lisp vend.asd src/*.lisp
-	ecl --load build.lisp
+	ros --load build.lisp
 
 install: vend
 	mkdir -p ~/.local/bin/

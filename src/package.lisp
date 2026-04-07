@@ -91,11 +91,15 @@
 
 ;; --- Compiler --- ;;
 
-(defparameter *compilers* '("sbcl" "ecl" "abcl" "alisp" "clasp" "ccl" "clisp" "cmucl"))
+(defparameter *compilers* '("sbcl" "ecl" "abcl" "alisp" "clasp" "ccl" "clisp" "cmucl" "ros"))
 
 (defun clisp? (compiler)
   "Is this clisp?"
   (string= "clisp" compiler))
+
+(defun ros? (compiler)
+  "Is this roswell"
+  (string= "ros" compiler))
 
 (defun compiler? (arg)
   "Does the given CLI arg refer to a known compiler?"

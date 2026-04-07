@@ -318,8 +318,9 @@ Flags:
   "Evaluate some Lisp in the requested REPL."
   (let* ((eval (eval-flag compiler))
          (load (list eval +require-asdf+ eval +init-registry+))
-         (clisp (if (clisp? compiler) '("-repl") '())))
-    (ext:run-program compiler (append args clisp load extra) :output t :input *standard-input*)))
+         (clisp (if (clisp? compiler) '("-repl") '()))
+         (ros (if (ros? compiler) '("run") '())))
+    (ext:run-program compiler (append args clisp ros load extra) :output t :input *standard-input*)))
 
 (defun main ()
   (let ((ext:*lisp-init-file-list* nil)
