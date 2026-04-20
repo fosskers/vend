@@ -492,7 +492,7 @@ map back to the parent, such that later only one git clone is performed.")
     :map-set         "https://github.com/stylewarning/map-set.git"
     :markup          "https://github.com/moderninterpreters/markup.git"
     :marshal         "https://github.com/wlbr/cl-marshal.git"
-    :mathkit         "https://github.com/lispgames/mathkkit.git"
+    :mathkit         "https://github.com/lispgames/mathkit.git"
     :maxpc           "https://github.com/eugeneia/maxpc.git"
     :mcclim          "https://codeberg.org/McCLIM/McCLIM.git"
     :md5             "https://github.com/pmai/md5.git"
