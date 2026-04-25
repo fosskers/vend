@@ -1,11 +1,15 @@
 # vend
 
-## Unreleased
+## 0.3.3 (2026-04-25)
 
 #### Added
 
 - Access to `mgl-pax` subsystems.
 - `cl-migratum` and its dependencies to the registry.
+
+#### Fixed
+
+- Accounted for repository migrations.
 
 ## 0.3.2 (2026-01-20)
 
