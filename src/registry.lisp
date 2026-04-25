@@ -214,6 +214,7 @@ map back to the parent, such that later only one git clone is performed.")
     :cl-colors       "https://github.com/tpapp/cl-colors.git"
     :cl-colors2      "https://codeberg.org/cage/cl-colors2.git"
     :cl-colors-ng    "https://codeberg.org/cage/cl-colors-ng.git"
+    :cl-conspack     "https://github.com/conspack/cl-conspack.git"
     :cl-containers   "https://github.com/hraban/cl-containers.git"
     :cl-cookie       "https://github.com/fukamachi/cl-cookie.git"
     :cl-coveralls    "https://github.com/fukamachi/cl-coveralls.git"
