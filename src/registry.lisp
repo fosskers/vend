@@ -10,11 +10,12 @@
     :3bmd-ext-math :3bmd
     :3bmd-ext-tables :3bmd
     :3b-bmfont/json :3b-bmfont
+    :acclimation-temperature :acclimation
     :alloy-animation :alloy
     :alloy-simple :alloy
     :alloy-simple-presentations :alloy
     :array-operations/all :array-operations
-    :autoload :mgl-pax
+    :autoload-doc :autoload
     :automaton :mcclim
     :babel-streams :babel
     :binpack/2 :binpack
@@ -46,7 +47,8 @@
     :depot-in-memory :depot
     :depot-virtual :depot
     :depot-zip :depot
-    :dref :mgl-pax
+    :dref/full :dref
+    :dref-test :dref
     :eclector-concrete-syntax-tree :eclector
     :feedback-client :feedback
     :glsl-symbols :glsl-spec
@@ -127,6 +129,8 @@ map back to the parent, such that later only one git clone is performed.")
     :cl-syntax
     :cl-yaml
     :dynamic-classes
+    :eos
+    :find-port
     :optima
     :path-parse
     :prove
@@ -174,6 +178,7 @@ map back to the parent, such that later only one git clone is performed.")
     :assoc-utils     "https://github.com/fukamachi/assoc-utils.git"
     :async-process   "https://github.com/lem-project/async-process.git"
     :atomics         "https://codeberg.org/shinmera/atomics.git"
+    :autoload        "https://github.com/melisgl/autoload.git"
     :babel           "https://github.com/cl-babel/babel.git"
     :blackbird       "https://github.com/orthecreedence/blackbird.git"
     :bobbin          "https://github.com/sjl/bobbin.git"
@@ -247,6 +252,7 @@ map back to the parent, such that later only one git clone is performed.")
     :cl-isaac        "https://github.com/thephoeron/cl-isaac.git"
     :cl-jpeg         "https://github.com/sharplispers/cl-jpeg.git"
     :cl-json         "https://github.com/sharplispers/cl-json.git"
+    :cl-js           "https://github.com/akapav/js"
     :cl-json-pointer "https://github.com/y2q-actionman/cl-json-pointer.git"
     :cl-ktx          "https://codeberg.org/shinmera/cl-ktx.git"
     :cl-l10n         "https://gitlab.common-lisp.net/cl-l10n/cl-l10n.git"
@@ -288,6 +294,7 @@ map back to the parent, such that later only one git clone is performed.")
     :cl-smtp         "https://gitlab.common-lisp.net/cl-smtp/cl-smtp.git"
     :cl-steamworks   "https://codeberg.org/shinmera/cl-steamworks.git"
     :cl-syntax       "https://github.com/m2ym/cl-syntax.git"
+    :cl-syslog       "https://github.com/mmaul/cl-syslog.git"
     :cl-template     "https://github.com/alpha123/cl-template.git"
     :cl-tga          "https://github.com/fisxoj/cl-tga.git"
     :cl-theora       "https://codeberg.org/shirakumo/cl-theora.git"
@@ -358,16 +365,20 @@ map back to the parent, such that later only one git clone is performed.")
     :dns-client      "https://codeberg.org/shinmera/dns-client.git"
     :dissect         "https://codeberg.org/shinmera/dissect.git"
     :do-urlencode    "https://github.com/drdo/do-urlencode.git"
+    :docudown        "https://github.com/daninus14/docudown.git"
     :documentation-utils "https://codeberg.org/shinmera/documentation-utils.git"
     :drakma          "https://github.com/edicl/drakma.git"
+    :dref            "https://github.com/melisgl/dref.git"
     :dual-numbers    "https://github.com/jrm-code-project/dual-numbers.git"
     :duologue        "https://github.com/mmontone/duologue.git"
     :dynamic-classes "https://github.com/hraban/dynamic-classes.git"
+    :eager-future2   "https://github.com/GunioRobot/Eager-Future2"
     :easing          "https://github.com/vydd/easing.git"
     :easy-routes     "https://github.com/mmontone/easy-routes.git"
     :eclector        "https://github.com/s-expressionists/Eclector.git"
     :email-parse     "https://github.com/pyramidi0n/email-parse.git"
     :enchant         "https://github.com/tlikonen/cl-enchant.git"
+    :eos             "https://github.com/adlai/Eos"
     :esrap           "https://github.com/scymtym/esrap.git"
     :external-program "https://github.com/sellout/external-program.git"
     :event-emitter   "https://github.com/fukamachi/event-emitter.git"
@@ -386,6 +397,7 @@ map back to the parent, such that later only one git clone is performed.")
     :file-select     "https://codeberg.org/shinmera/file-select.git"
     :filepaths       "https://github.com/fosskers/filepaths.git"
     :filesystem-utils "https://codeberg.org/shinmera/filesystem-utils.git"
+    :find-port       "https://github.com/eudoxia0/find-port.git"
     :fiveam          "https://github.com/lispci/fiveam.git"
     :flexi-streams   "https://github.com/edicl/flexi-streams.git"
     :flexichain      "https://github.com/robert-strandh/Flexichain.git"
@@ -546,6 +558,7 @@ map back to the parent, such that later only one git clone is performed.")
     :parenscript     "https://gitlab.common-lisp.net/parenscript/parenscript.git"
     :parse-declarations-1.0 "https://gitlab.common-lisp.net/parse-declarations/parse-declarations.git"
     :parse-float     "https://github.com/soemraws/parse-float.git"
+    :parse-js        "https://github.com/marijnh/parse-js"
     :parse-number    "https://github.com/sharplispers/parse-number.git"
     :path-parse      "https://github.com/eudoxia0/path-parse.git"
     :pathname-utils  "https://codeberg.org/shinmera/pathname-utils.git"
@@ -638,7 +651,7 @@ map back to the parent, such that later only one git clone is performed.")
     :split-sequence  "https://github.com/sharplispers/split-sequence.git"
     :spinneret       "https://github.com/ruricolist/spinneret.git"
     :st-json         "https://github.com/marijnh/ST-JSON.git"
-    :stefil          "https://gitlab.common-lisp.net/stefil/stefil.git"
+    :stefil          "https://github.com/hu-dwim/hu.dwim.stefil.git"
     :sqlite          "https://github.com/TeMPOraL/cl-sqlite.git"
     :static-dispatch "https://github.com/alex-gutev/static-dispatch.git"
     :static-vectors  "https://github.com/sionescu/static-vectors.git"
@@ -800,6 +813,7 @@ map back to the parent, such that later only one git clone is performed.")
       (when (string-starts-with? (symbol-name sys) "CFFI-") :cffi)
       (when (string-starts-with? (symbol-name sys) "CLACK-") :clack)
       (when (string-starts-with? (symbol-name sys) "DBD-") :dbi)
+      (when (string-starts-with? (symbol-name sys) "FARE-QUASIQUOTE-") :fare-quasiquote)
       (when (string-starts-with? (symbol-name sys) "FRUGAL-UUID/") :frugal-uuid)
       (when (string-starts-with? (symbol-name sys) "GENERIC-CL.") :generic-cl)
       (when (string-starts-with? (symbol-name sys) "HSX/") :hsx)
