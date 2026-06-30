@@ -308,6 +308,7 @@ map back to the parent, such that later only one git clone is performed.")
     :cl-wavefront    "https://codeberg.org/shirakumo/cl-wavefront.git"
     :cl-webkit2      "https://github.com/joachifm/cl-webkit.git"
     :cl-who          "https://github.com/edicl/cl-who.git"
+    :cl-xkb          "https://github.com/malcolmstill/cl-xkb.git"
     :cl-yaml         "https://github.com/eudoxia0/cl-yaml.git"
     :clache          "https://github.com/html/clache.git"
     :clack           "https://github.com/fukamachi/clack.git"
