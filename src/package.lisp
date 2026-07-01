@@ -8,9 +8,6 @@
 
 (in-package :vend)
 
-#-ecl
-(error "VEND can only be compiled with ECL.")
-
 ;; --- Typing --- ;;
 
 (defmacro fn (name type)
@@ -91,11 +88,17 @@
 
 ;; --- Compiler --- ;;
 
-(defparameter *compilers* '("sbcl" "ecl" "abcl" "alisp" "clasp" "ccl" "clisp" "cmucl"))
+(defparameter *compilers*
+  '("sbcl" "ecl" "abcl" "alisp" "clasp" "ccl" "clisp" "cmucl" "lw-console")
+  "Command names that `vend repl', `vend eval', and `vend test' may launch.")
 
 (defun clisp? (compiler)
   "Is this clisp?"
   (string= "clisp" compiler))
+
+(defun lispworks? (compiler)
+  "Is this LispWorks?  SCS uses the `lw-console' executable on macOS."
+  (string= "lw-console" compiler))
 
 (defun compiler? (arg)
   "Does the given CLI arg refer to a known compiler?"
@@ -104,6 +107,7 @@
 (defun eval-flag (compiler)
   "The flag necessary to directly inject Lisp into a new REPL."
   (cond ((string= "alisp" compiler) "-e")
+        ((lispworks? compiler) "-eval")
         ((clisp? compiler) "-x")
         (t "--eval")))
 
@@ -116,4 +120,6 @@ must come before any '--eval' flags."
         ((string= "alisp" compiler) (values '() '("--kill")))
         ((string= "clisp" compiler) (values '("--silent") '("-x" "(ext:quit)")))
         ((string= "ccl" compiler)   (values '() '("--eval" "(ccl:quit)")))
+        ((lispworks? compiler)      (values '("-siteinit" "-" "-init" "-")
+                                            '("-eval" "(lispworks:quit :status 0)")))
         ((string= "cmucl" compiler) (values '("--quiet") '("--eval" "(quit)")))))

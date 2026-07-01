@@ -41,7 +41,7 @@ originally system could be found for it."
   "Produce a dependency graph of all systems depended upon by systems of the root
 project. If FOCUS is supplied, only considers the subgraph with that FOCUS as
 the root."
-  (let ((graph (build-graph (ext:getcwd) focus)))
+  (let ((graph (build-graph (uiop:getcwd) focus)))
     (with-open-file (stream #p"deps.dot" :direction :output :if-exists :supersede)
       (g:to-dot-with-stream graph stream))))
 
@@ -85,8 +85,8 @@ a populated `vendored/' directory already."
 (defun vend/check (&key focus)
   "Check the dependency graph for old deps, etc."
   (let* ((graph (g:make-graph))
-         (top   (scan-systems! graph (root-asd-files (ext:getcwd)))))
-    (scan-systems! graph (asd-files (f:join (ext:getcwd) "vendored")))
+         (top   (scan-systems! graph (root-asd-files (uiop:getcwd)))))
+    (scan-systems! graph (asd-files (f:join (uiop:getcwd) "vendored")))
     (let ((final (cond (focus (g:subgraph graph (into-keyword focus)))
                        (t (apply #'g:subgraph graph top)))))
       (t:transduce (t:comp (t:map #'car)
@@ -115,9 +115,12 @@ a populated `vendored/' directory already."
 (defun clone (url path)
   "Given a source URL to clone from, do a shallow git clone into a given absolute PATH."
   (unless (probe-file path)
-    (multiple-value-bind (stream code obj)
-        (ext:run-program "git" (list "clone" "--quiet" "--depth=1" url path) :output t)
-      (declare (ignore stream obj))
+    (multiple-value-bind (output error-output code)
+        (uiop:run-program (list "git" "clone" "--quiet" "--depth=1" url path)
+                          :output t
+                          :error-output t
+                          :ignore-error-status t)
+      (declare (ignore output error-output))
       (assert (= 0 code) nil "Clone failed: ~a" url))))
 
 (defun work (cwd target)
@@ -172,7 +175,7 @@ a populated `vendored/' directory already."
 
 ;; --- Project Initialization --- ;;
 
-(defconstant +defsystem-template+
+(defparameter +defsystem-template+
   "(defsystem \"~a\"
   :version \"0.0.0\"
   :author \"\"
@@ -184,7 +187,7 @@ a populated `vendored/' directory already."
   :description \"\")
 ")
 
-(defconstant +defpackage-template+
+(defparameter +defpackage-template+
   "(defpackage ~a
   (:use :cl)
   (:documentation \"\"))
@@ -192,7 +195,7 @@ a populated `vendored/' directory already."
 (in-package :~a)
 ")
 
-(defconstant +gitignore-template+
+(defparameter +gitignore-template+
   "vendored/
 *.fasl
 *.fas
@@ -216,7 +219,7 @@ a populated `vendored/' directory already."
 
 ;; --- Executable --- ;;
 
-(defconstant +help+
+(defparameter +help+
   "vend - Vendor your Common Lisp dependencies
 
 Commands:
@@ -234,33 +237,21 @@ Flags:
   --version - Display the current version of vend
 ")
 
-(defparameter +vend-rules+
-  '((("--help" "-h") 0 (vend/help))
-    ("--version" 0 (format t "0.3.3~%"))
-    ("check"  1 (vend/check :focus (cadr 1)) :stop)
-    ("eval"   1 (vend/eval (cdr 1)) :stop)
-    ("get"    0 (vend/get))
-    ("graph"  1 (vend/graph :focus (cadr 1)) :stop)
-    ("init"   1 (vend/init (cadr 1)) :stop)
-    ("repl"   1 (vend/repl (cdr 1)) :stop)
-    ("search" 1 (vend/search 1))
-    ("test"   1 (vend/test (cdr 1)) :stop)))
-
 (defun vend/help ()
   (princ +help+))
 
 (defun vend/get ()
   "Download all dependencies."
-  (let* ((cwd (ext:getcwd))
+  (let* ((cwd (uiop:getcwd))
          (dir (f:ensure-directory (f:join cwd "vendored"))))
     (vlog "Downloading dependencies.")
     (handler-bind ((error (lambda (c)
                             (format t "~a~%" c)
-                            (ext:quit 1))))
+                            (uiop:quit 1))))
       (work cwd dir))
     (vlog "Done.")))
 
-(defun vend/test (args &key (dir (ext:getcwd)))
+(defun vend/test (args &key (dir (uiop:getcwd)))
   "Run detected test systems."
   (let* ((compiler (or (car args) "sbcl"))
          (eval (eval-flag compiler))
@@ -274,11 +265,14 @@ Flags:
                                        (t:once eval))
                                #'t:cons (append (list +require-asdf+ +init-registry+) tests))))
         (vlog "Running tests.")
-        (multiple-value-bind (stream code state)
-            (ext:run-program compiler (append (cdr args) clisp exps) :output *standard-output*)
-          (declare (ignore stream state))
+        (multiple-value-bind (output error-output code)
+            (uiop:run-program (cons compiler (append (cdr args) clisp exps))
+                              :output t
+                              :error-output t
+                              :ignore-error-status t)
+          (declare (ignore output error-output))
           (unless (zerop code)
-            (ext:quit 1)))))))
+            (uiop:quit 1)))))))
 
 #++
 (vend/test '() :dir #p"/home/colin/code/common-lisp/filepaths/")
@@ -319,14 +313,70 @@ Flags:
   (let* ((eval (eval-flag compiler))
          (load (list eval +require-asdf+ eval +init-registry+))
          (clisp (if (clisp? compiler) '("-repl") '())))
-    (ext:run-program compiler (append args clisp load extra) :output t :input *standard-input*)))
+    (uiop:run-program (cons compiler (append args clisp load extra))
+                      :output :interactive
+                      :error-output :interactive
+                      :input :interactive
+                      :ignore-error-status t)))
+
+(defun vend/usage-error (format-control &rest args)
+  "Report a command-line usage error and exit with the normal Unix code 2."
+  (format *error-output* "~&vend: ")
+  (apply #'format *error-output* format-control args)
+  (format *error-output* "~%~%")
+  (vend/help)
+  (uiop:quit 2))
+
+(defun args-after-double-dash (args)
+  "Return the command-line arguments after a \"--\" marker, if one exists."
+  (loop for tail on args
+        when (string= "--" (car tail))
+          return (cdr tail)))
+
+(defun vend/command-line-arguments ()
+  "Return user arguments in a form suitable for `vend/dispatch'.
+
+When a Lisp image is launched through an implementation's script wrapper, UIOP
+may include a leading \"--\" marker.  A saved executable normally does not.  The
+normalised list lets the dispatcher treat both forms the same way."
+  (let ((args (uiop:command-line-arguments)))
+    (cond ((and args (string= "--" (car args))) (cdr args))
+          (args args)
+          #+lispworks
+          (t (args-after-double-dash system:*line-arguments-list*))
+          #-lispworks
+          (t nil))))
+
+(defun vend/dispatch (args)
+  "Run the vend command represented by ARGS.
+
+ARGS is a list of user-facing strings, such as '(\"graph\" \"transducers\").
+The dispatcher is intentionally plain: each command is visible in one place,
+and commands with optional arguments pass NIL when the argument is absent."
+  (let ((command (car args))
+        (rest (cdr args)))
+    (cond ((null command) (vend/help))
+          ((member command '("--help" "-h") :test #'string=) (vend/help))
+          ((string= command "--version") (format t "0.3.3~%"))
+          ((string= command "check") (vend/check :focus (car rest)))
+          ((string= command "eval") (vend/eval rest))
+          ((string= command "get") (vend/get))
+          ((string= command "graph") (vend/graph :focus (car rest)))
+          ((string= command "init")
+           (if (car rest)
+               (vend/init (car rest))
+               (vend/usage-error "missing project name for `vend init'")))
+          ((string= command "repl") (vend/repl rest))
+          ((string= command "search")
+           (if (car rest)
+               (vend/search (car rest))
+               (vend/usage-error "missing search term for `vend search'")))
+          ((string= command "test") (vend/test rest))
+          (t (vend/usage-error "unknown command: ~a" command)))))
 
 (defun main ()
-  (let ((ext:*lisp-init-file-list* nil)
-        (ext:*help-message* +help+))
-    (cond ((= 1 (length ext:*command-args*)) (vend/help))
-          (t (ext:process-command-args :rules +vend-rules+)))
-    (ext:quit 0)))
+  (vend/dispatch (vend/command-line-arguments))
+  (uiop:quit 0))
 
 ;; Bad boys:
 ;; https://github.com/slyrus/opticl/blob/master/opticl-doc.asd

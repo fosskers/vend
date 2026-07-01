@@ -48,7 +48,7 @@
                #'t:cons (directory (f:ensure-directory (f:join dir "*/")))))
 
 #++
-(root-asd-files (ext:getcwd))
+(root-asd-files (uiop:getcwd))
 #++
 (root-asd-files "/home/colin/code/common-lisp/zauberwald/")
 
