@@ -9,6 +9,9 @@
 
 (format t "--- COMPILING EXECUTABLE ---~%")
 (setf uiop:*image-entry-point* #'vend:main)
-(uiop:dump-image #p"vend" :executable t)
+(uiop:dump-image #p"vend"
+                 :executable t
+                 :compression #+sbcl (not (null (member :sb-core-compression *features*)))
+                              #-sbcl nil)
 (format t "--- DONE ---~%")
 (uiop:quit 0)
