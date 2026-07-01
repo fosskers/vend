@@ -82,7 +82,8 @@
     ;; `get-parent' but it is necessary, as `trial-assets' is a separate repo.
     :trial-assets :trial-assets
     :ubiquitous-concurrent :ubiquitous
-    :uiop :asdf)
+    :uiop :asdf
+    :wayflan-client :wayflan)
   "Systems are often bundled together into a single repository. This list helps
 map back to the parent, such that later only one git clone is performed.")
 
