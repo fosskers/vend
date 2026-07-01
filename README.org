@@ -50,7 +50,6 @@ It's time for some peace of mind.
   - [[#how-do-i-refer-to-local-dependencies][How do I refer to local dependencies?]]
   - [[#can-i-install-new-dependencies-while-vend-repl-is-running][Can I install new dependencies while =vend repl= is running?]]
   - [[#does-this-use-git-submodules][Does this use git submodules?]]
-  - [[#why-ecl][Why ECL?]]
 
 * Why vendor dependencies?
 
@@ -112,8 +111,10 @@ how your software should be provisioned.
 
 * Installation
 
-In all cases, =vend= requires [[https://ecl.common-lisp.dev/][ECL]] to build and run. However, it can be used to
-manage projects of any underlying compiler (see =vend repl=).
+The source build shown here uses [[https://www.sbcl.org/][SBCL]]. This is a portability convenience for
+environments where ECL is not readily available, such as some SmartOS zones.
+The resulting executable can still manage projects that use other underlying
+compilers (see =vend repl=).
 
 ** From Source
 
@@ -127,7 +128,7 @@ make install
 or manually:
 
 #+begin_example
-ecl --load build.lisp
+sbcl --load build.lisp
 mv vend ~/.local/bin/
 #+end_example
 
@@ -508,7 +509,8 @@ But you're discouraged from doing this habitually.
 
 ** How can I build executables of my application?
 
-See [[file:build.lisp][build.lisp]] for how =vend= is built, which uses ECL. For SBCL, consider adding:
+See [[file:build.lisp][build.lisp]] for how =vend= is built with UIOP. For
+application-specific SBCL executables, consider adding:
 
 #+begin_src lisp
 (sb-ext:save-lisp-and-die #p"foobar"
@@ -557,10 +559,3 @@ No. Submodules need to be recloned by your users, which is a weaker long-term
 guarantee than true vendoring. Submodules are also a pain in the neck to manage.
 With =vend=, if you want to change and make new commits to vendored dependencies,
 you're still free to do so.
-
-** Why ECL?
-
-To avoid dependencies, =vend= uses a number of [[https://gitlab.com/embeddable-common-lisp/ecl][ECL]]-specific extensions. However,
-you're free to use it to manage Lisp projects of any (modern) compiler. ECL
-typically produces very small binaries; in the case of =vend= it's only a few
-hundred kilobytes, which eases distribution.
