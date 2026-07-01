@@ -7,18 +7,8 @@
 (declaim (optimize (speed 3) (debug 1) (safety 1)))
 (asdf:load-system :vend)
 
-#-ecl
-(progn
-  (format t "--- NO OP! ---~%")
-  (format t "Use ECL instead.~%")
-  #+sbcl (sb-ext:exit :code 1))
-
-#+ecl
-(progn
-  (format t "--- COMPILING EXECUTABLE ---~%")
-  (asdf:make-build :vend
-                   :type :program
-                   :move-here #p"./"
-                   :epilogue-code '(vend:main))
-  (format t "--- DONE ---~%")
-  (ext:quit 0))
+(format t "--- COMPILING EXECUTABLE ---~%")
+(setf uiop:*image-entry-point* #'vend:main)
+(uiop:dump-image #p"vend" :executable t)
+(format t "--- DONE ---~%")
+(uiop:quit 0)
