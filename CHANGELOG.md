@@ -1,5 +1,11 @@
 # vend
 
+## Unreleased
+
+#### Added
+
+- Support for `NO_COLOR`. Set to `1`, `true`, or `yes` to disable all coloured output.
+
 ## 0.3.3 (2026-04-25)
 
 #### Added
