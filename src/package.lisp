@@ -70,17 +70,33 @@
 
 ;; --- Colours --- ;;
 
+(defparameter *colour?* t
+  "Whether or not to add ANSI colour codes to STDOUT messages. This is not to
+  have `setq` called on it; instead you should bind it locally with `let` and
+  have that naturally propagate through the child calls down to where it's
+  needed, namely in `vlog`, etc.")
+
+(defun colour? ()
+  "Should STDOUT messages contain colour codes?"
+  (let ((var (ext:getenv "NO_COLOR")))
+    (not (or (string-equal var "yes")
+             (string-equal var "1")
+             (string-equal var "true")))))
+
 (defun bold-red (text)
   "Highlight some text in red."
-  (format nil "~c[31;1m~a~c[0m" #\escape text #\escape))
+  (cond (*colour?* (format nil "~c[31;1m~a~c[0m" #\escape text #\escape))
+        (t text)))
 
 (defun bold-cyan (text)
   "Highlight some text in cyan."
-  (format nil "~c[96;1m~a~c[0m" #\escape text #\escape))
+  (cond (*colour?* (format nil "~c[96;1m~a~c[0m" #\escape text #\escape))
+        (t text)))
 
 (defun bold (text)
   "Just enbolden some text without colouring it."
-  (format nil "~c[1m~a~c[0m" #\escape text #\escape))
+  (cond (*colour?* (format nil "~c[1m~a~c[0m" #\escape text #\escape))
+        (t text)))
 
 ;; --- Logging --- ;;
 

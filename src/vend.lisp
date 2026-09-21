@@ -85,7 +85,8 @@ a populated `vendored/' directory already."
 (defun vend/check (&key focus)
   "Check the dependency graph for old deps, etc."
   (let* ((graph (g:make-graph))
-         (top   (scan-systems! graph (root-asd-files (ext:getcwd)))))
+         (top   (scan-systems! graph (root-asd-files (ext:getcwd))))
+         (*colour?* (colour?)))
     (scan-systems! graph (asd-files (f:join (ext:getcwd) "vendored")))
     (let ((final (cond (focus (g:subgraph graph (into-keyword focus)))
                        (t (apply #'g:subgraph graph top)))))
@@ -252,7 +253,8 @@ Flags:
 (defun vend/get ()
   "Download all dependencies."
   (let* ((cwd (ext:getcwd))
-         (dir (f:ensure-directory (f:join cwd "vendored"))))
+         (dir (f:ensure-directory (f:join cwd "vendored")))
+         (*colour?* (colour?)))
     (vlog "Downloading dependencies.")
     (handler-bind ((error (lambda (c)
                             (format t "~a~%" c)
@@ -268,6 +270,7 @@ Flags:
          (systems (t:transduce (t:comp (t:map #'systems-from-file)
                                        #'t:concatenate)
                                #'t:cons (root-asd-files dir)))
+         (*colour?* (colour?))
          (tests (test-invocations systems)))
     (when tests
       (let ((exps (t:transduce (t:comp (t:intersperse eval)
